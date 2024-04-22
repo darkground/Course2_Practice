@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Course2 Practice - Pathfinder</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="assets.qrc">
+    <normaloff>:/assets/path.png</normaloff>:/assets/path.png</iconset>
   </property>
   <widget class="QWidget" name="layoutCentral">
    <layout class="QHBoxLayout" name="horizontalLayout_2">

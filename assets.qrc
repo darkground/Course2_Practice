@@ -7,5 +7,6 @@
         <file>assets/load.png</file>
         <file>assets/save.png</file>
         <file>assets/start.png</file>
+        <file>assets/path.png</file>
     </qresource>
 </RCC>
