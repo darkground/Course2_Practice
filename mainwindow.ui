@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1090</width>
+    <height>612</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="layoutCentral">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QWidget" name="layoutButtons" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="btnAdd">
+         <property name="styleSheet">
+          <string notr="true">text-align: left;
+padding: 3px;</string>
+         </property>
+         <property name="text">
+          <string>Добавить</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>assets/add.png</normaloff>assets/add.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnDelete">
+         <property name="styleSheet">
+          <string notr="true">text-align: left;
+padding: 3px;</string>
+         </property>
+         <property name="text">
+          <string>Удалить</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>assets/erase.png</normaloff>assets/erase.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnEdit">
+         <property name="styleSheet">
+          <string notr="true">text-align: left;
+padding: 3px;</string>
+         </property>
+         <property name="text">
+          <string>Редактировать</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>assets/edit.png</normaloff>assets/edit.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnStart">
+         <property name="styleSheet">
+          <string notr="true">text-align: left;
+padding: 3px;</string>
+         </property>
+         <property name="text">
+          <string>Старт</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>assets/start.png</normaloff>assets/start.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnFinish">
+         <property name="styleSheet">
+          <string notr="true">text-align: left;
+padding: 3px;</string>
+         </property>
+         <property name="text">
+          <string>Финиш</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>assets/finish.png</normaloff>assets/finish.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacerButtons">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnLoad">
+         <property name="styleSheet">
+          <string notr="true">text-align: left;
+padding: 3px;</string>
+         </property>
+         <property name="text">
+          <string>Загрузить карту</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>assets/load.png</normaloff>assets/load.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnSave">
+         <property name="styleSheet">
+          <string notr="true">text-align: left;
+padding: 3px;</string>
+         </property>
+         <property name="text">
+          <string>Сохранить карту</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>assets/save.png</normaloff>assets/save.png</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="layoutMain" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="frameGraph">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="layoutStatus" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Нет работы</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerStatus">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>0 объектов</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelCoords">
+            <property name="text">
+             <string>Координаты: [0, 0]</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
