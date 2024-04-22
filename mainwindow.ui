@@ -43,8 +43,8 @@ padding: 3px;</string>
           <string>Добавить</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>assets/add.png</normaloff>assets/add.png</iconset>
+          <iconset resource="assets.qrc">
+           <normaloff>:/assets/add.png</normaloff>:/assets/add.png</iconset>
          </property>
         </widget>
        </item>
@@ -58,8 +58,8 @@ padding: 3px;</string>
           <string>Удалить</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>assets/erase.png</normaloff>assets/erase.png</iconset>
+          <iconset resource="assets.qrc">
+           <normaloff>:/assets/erase.png</normaloff>:/assets/erase.png</iconset>
          </property>
         </widget>
        </item>
@@ -73,8 +73,8 @@ padding: 3px;</string>
           <string>Редактировать</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>assets/edit.png</normaloff>assets/edit.png</iconset>
+          <iconset resource="assets.qrc">
+           <normaloff>:/assets/edit.png</normaloff>:/assets/edit.png</iconset>
          </property>
         </widget>
        </item>
@@ -88,8 +88,8 @@ padding: 3px;</string>
           <string>Старт</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>assets/start.png</normaloff>assets/start.png</iconset>
+          <iconset resource="assets.qrc">
+           <normaloff>:/assets/start.png</normaloff>:/assets/start.png</iconset>
          </property>
         </widget>
        </item>
@@ -103,8 +103,8 @@ padding: 3px;</string>
           <string>Финиш</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>assets/finish.png</normaloff>assets/finish.png</iconset>
+          <iconset resource="assets.qrc">
+           <normaloff>:/assets/finish.png</normaloff>:/assets/finish.png</iconset>
          </property>
         </widget>
        </item>
@@ -138,8 +138,8 @@ padding: 3px;</string>
           <string>Загрузить карту</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>assets/load.png</normaloff>assets/load.png</iconset>
+          <iconset resource="assets.qrc">
+           <normaloff>:/assets/load.png</normaloff>:/assets/load.png</iconset>
          </property>
         </widget>
        </item>
@@ -153,8 +153,8 @@ padding: 3px;</string>
           <string>Сохранить карту</string>
          </property>
          <property name="icon">
-          <iconset>
-           <normaloff>assets/save.png</normaloff>assets/save.png</iconset>
+          <iconset resource="assets.qrc">
+           <normaloff>:/assets/save.png</normaloff>:/assets/save.png</iconset>
          </property>
         </widget>
        </item>
@@ -270,6 +270,8 @@ padding: 3px;</string>
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="assets.qrc"/>
+ </resources>
  <connections/>
 </ui>
