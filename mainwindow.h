@@ -15,6 +15,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void load();
+    //void save();
+    void coords(QPoint p);
+    void objects(unsigned c);
+
 private:
     Ui::MainWindow *ui;
 };
