@@ -20,6 +20,7 @@ private slots:
     //void save();
     void coords(QPoint p);
     void objects(unsigned c);
+    void status(QString s);
 
 private:
     Ui::MainWindow *ui;

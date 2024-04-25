@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->widgetGraph, &Canvas::coords, this, &MainWindow::coords);
     connect(ui->widgetGraph, &Canvas::objects, this, &MainWindow::objects);
+    connect(ui->widgetGraph, &Canvas::status, this, &MainWindow::status);
 
     connect(ui->btnLoad, &QPushButton::clicked, this, &MainWindow::load);
     //connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::save);
@@ -29,8 +30,11 @@ void MainWindow::objects(unsigned c) {
     ui->labelObjects->setText(s);
 }
 
+void MainWindow::status(QString s) {
+    ui->labelStatus->setText(s);
+}
+
 void MainWindow::load() {
     ui->widgetGraph->load("data.xml");
-    ui->labelStatus->setText("XML загружен");
     ui->widgetGraph->update();
 }
