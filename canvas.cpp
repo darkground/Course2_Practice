@@ -14,6 +14,7 @@ void Canvas::paintEvent(QPaintEvent*)
 {
     QPainter p;
     p.begin(this);
+    p.setRenderHint(QPainter::Antialiasing);
 
     QSize canvasSize = size();
 
