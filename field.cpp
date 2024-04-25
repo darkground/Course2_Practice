@@ -97,6 +97,7 @@ void Field::drawGraphOfField(Field MainField) {
     QVector <QPoint> list_of_points(0);
     //int index = 0;
 
+    // Создание списка из всех точек поля
     for(int i = 0; i < MainField.height; ++i) {
         for(int j = 0; j < MainField.width; ++j) {
             QPoint point(i, j);
@@ -104,4 +105,6 @@ void Field::drawGraphOfField(Field MainField) {
             //++index;
         }
     }
+
+    // Присваивание точкам поля проходимости (в процессе)
 }
