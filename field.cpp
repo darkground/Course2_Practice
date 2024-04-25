@@ -90,3 +90,5 @@ float Field::getFactor(QPoint point) {
     }
     return 1.;
 }
+
+// test commit
