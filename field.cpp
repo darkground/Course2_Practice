@@ -88,5 +88,5 @@ float Field::getFactor(QPoint point) {
             return obst.walkness;
         }
     }
-    return 1.;
+    return 0.;
 }
