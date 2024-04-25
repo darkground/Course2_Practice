@@ -22,10 +22,11 @@ public:
 
 signals:
     void coords(QPoint p);
+    void status(QString s);
     void objects(unsigned c);
 
 protected:
-    Field* field;
+    Field* field = 0;
 
     void paintEvent(QPaintEvent*);
     bool event(QEvent* e);
