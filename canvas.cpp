@@ -19,7 +19,7 @@ void Canvas::paintEvent(QPaintEvent*)
     QSize canvasSize = size();
 
     // Round box
-    p.setPen(QPen(Qt::blue));
+    p.setPen(QPen(Qt::black));
     p.drawRect(0, 0, canvasSize.width() - 1, canvasSize.height() - 1);
 
     // Drawing polygons
@@ -61,6 +61,23 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
 
 void Canvas::load(QString path)
 {
-    this->field->load(path);
-    emit objects(this->field->count());
+    QSize canvasSize = size();
+    this->field->resize(canvasSize.width(), canvasSize.height());
+    int code = this->field->load(path);
+    switch (code) {
+    case -1:
+        emit status(QString("xml не найден"));
+        break;
+    case -2:
+        emit status(QString("нарушена структура xml-файла"));
+        break;
+    case -3:
+        emit status(QString("xml-файл хранит недопустимые значения"));
+        break;
+    default:
+        emit status(QString("xml успешно загружен"));
+        emit objects(this->field->count());
+        update();
+        break;
+    }
 }
