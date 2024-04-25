@@ -11,11 +11,18 @@
 
 class Field
 {
+    const QColor outline = QColor(26, 26, 26);
+    const int outlineWidth = 2;
+
+    const QColor fillEasy = QColor(212, 212, 212);
+    const QColor fillHard = QColor(74, 74, 74);
+
 public:
     Field(unsigned w, unsigned h);
 
-    void load(QString path);
-    void save(QString path);
+    int load(QString path);
+    int save(QString path);
+    void resize(unsigned w, unsigned h);
     float getFactor(QPoint point);
     unsigned count();
 

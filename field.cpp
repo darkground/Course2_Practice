@@ -5,66 +5,64 @@ Field::Field(unsigned w, unsigned h) {
     this->height = h;
 }
 
-QVector<Obstacle> getObstacles(QXmlStreamReader* xml) {
-    QVector<Obstacle> v;
-    while (!xml->atEnd() && !xml->hasError())
-    {
-        QXmlStreamReader::TokenType token = xml->readNext();
-        if (token == QXmlStreamReader::StartElement && xml->name() == QString("poly"))
-        {
-            QPolygon poly;
-            float w;
-            QXmlStreamAttributes polyAttrs = xml->attributes();
-            if (!polyAttrs.hasAttribute("walkness"))
-                return QVector<Obstacle>();
-            w = polyAttrs.value("walkness").toFloat();
-            qDebug() << "Polygon" << v.length() << "starts; w =" << w;
-            while (!(xml->tokenType() == QXmlStreamReader::EndElement && xml->name() == QString("poly")))
-            {
-                if (xml->readNext() == QXmlStreamReader::StartElement && xml->name() == QString("point"))
-                {
-                    QPoint p;
-                    QXmlStreamAttributes pointAttrs = xml->attributes();
-                    if (!pointAttrs.hasAttribute("x") || !pointAttrs.hasAttribute("y"))
-                        return QVector<Obstacle>();
-                    p.setX(pointAttrs.value("x").toInt());
-                    p.setY(pointAttrs.value("y").toInt());
-                    qDebug() << "Point" << p.x() << "," << p.y();
-                    poly << p;
-                }
-            }
-            qDebug() << "Polygon" << v.length() << "ends";
-            v.append(Obstacle(poly, w));
-        }
-    }
-    return v;
+QColor mix(QColor c1, QColor c2, float factor) {
+    return QColor(
+        c1.red() * (1 - factor) + c2.red(),
+        c1.green() * (1 - factor) + c2.green(),
+        c1.blue() * (1 - factor) + c2.blue()
+    );
 }
 
 // getPath...
 
-void Field::load(QString path) {
+int Field::load(QString path) {
     QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qDebug() << "Невозможно открыть XML-конфиг";
-        return;
-    }
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return -1;
     QXmlStreamReader xml(&file);
+    bool ok;
     while (!xml.atEnd() && !xml.hasError())
     {
         QXmlStreamReader::TokenType token = xml.readNext();
         if (token == QXmlStreamReader::StartElement)
         {
-            if (xml.name() == QString("polygons"))
-                this->obstacles = getObstacles(&xml);
+            if (xml.name() == QString("polygons")) {
+                while (!(xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QString("polygons"))) {
+                    if (xml.readNext() == QXmlStreamReader::StartElement && xml.name() == QString("poly")) {
+                        QXmlStreamAttributes polyAttrs = xml.attributes();
+                        if (!polyAttrs.hasAttribute("walkness")) return -2;
+                        QPolygon poly;
+                        float w = polyAttrs.value("walkness").toFloat(&ok);
+                        if (!ok || (w < 0. || w > 1.)) return -3;
+                        while (!(xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QString("poly"))) {
+                            if (xml.readNext() == QXmlStreamReader::StartElement && xml.name() == QString("point")) {
+                                QXmlStreamAttributes pointAttrs = xml.attributes();
+                                if (!pointAttrs.hasAttribute("x") || !pointAttrs.hasAttribute("y")) return -2;
+                                unsigned x = pointAttrs.value("x").toInt(&ok);
+                                if (!ok || (x < 0 || x > this->width)) return -3;
+                                unsigned y = pointAttrs.value("y").toInt(&ok);
+                                if (!ok || (y < 0 || y > this->height)) return -3;
+                                poly << QPoint(x, y);
+                            }
+                        }
+                        this->obstacles.append(Obstacle(poly, w));
+                    }
+                }
+            }
             if (xml.name() == QString("path"))
                 continue; //todo
         }
     }
+    return 0;
 }
 
-void Field::save(QString path) {
+int Field::save(QString path) {
+    return 0;
+}
 
+void Field::resize(unsigned w, unsigned h) {
+    this->obstacles.clear();
+    this->width = w;
+    this->height = h;
 }
 
 unsigned Field::count() {
@@ -72,12 +70,14 @@ unsigned Field::count() {
 }
 
 void Field::draw(QPainter* painter) {
-    QPen p(Qt::red);
-    p.setWidth(2);
+    QPen p(Field::outline);
+    p.setWidth(Field::outlineWidth);
     painter->setPen(p);
     painter->setBrush(Qt::green);
 
     for (Obstacle& obst : this->obstacles) {
+        QColor polyColor = mix(Field::fillEasy, Field::fillHard, obst.walkness);
+        painter->setBrush(polyColor);
         painter->drawPolygon(obst.poly);
     }
 }
