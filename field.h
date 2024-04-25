@@ -21,6 +21,9 @@ public:
 
     void draw(QPainter* painter);
 
+    // Algorithm Functions
+    void drawGraphOfField(Field MainField);
+
 protected:
     unsigned width, height;
     QVector<Obstacle> obstacles;

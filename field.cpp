@@ -92,3 +92,16 @@ float Field::getFactor(QPoint point) {
 }
 
 // test commit
+
+void Field::drawGraphOfField(Field MainField) {
+    QVector <QPoint> list_of_points(0);
+    //int index = 0;
+
+    for(int i = 0; i < MainField.height; ++i) {
+        for(int j = 0; j < MainField.width; ++j) {
+            QPoint point(i, j);
+            list_of_points.append(point);
+            //++index;
+        }
+    }
+}
