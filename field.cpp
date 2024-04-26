@@ -95,18 +95,18 @@ float Field::getFactor(QPoint point) {
 // test commit
 
 void Field::drawMeshOfField(Field MainField) {
-    QVector <pointOfMesh> list_of_points(0);
-    //int index = 0;
+    QPoint coords(0, 0);
+    pointOfMesh point(coords, 0);
+    QVector <pointOfMesh> list_of_points(MainField.width * MainField.height, point);
 
     // Создание списка из всех точек поля
     for(int i = 0; i < MainField.height; ++i) {
         for(int j = 0; j < MainField.width; ++j) {
-            pointOfMesh point;
-            QPoint coords(i, j);
+            coords.setX(i);
+            coords.setY(j);
             point.coord = coords;
 
             list_of_points.append(point);
-            //++index;
         }
     }
 
@@ -118,5 +118,5 @@ void Field::drawMeshOfField(Field MainField) {
 
 int Field::algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point) {
     int shortestWay = -1; // Если значение в конце работы алгоритма останется -1, значит путь до объекта не найден (что-то не так)
-
+    return shortestWay;
 }
