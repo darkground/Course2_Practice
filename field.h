@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QXmlStreamReader>
 #include "obstacle.h"
+#include "pointOfMesh.h"
 
 class Field
 {
@@ -30,6 +31,7 @@ public:
 
     // Algorithm Functions
     void drawMeshOfField(Field MainField);
+    int algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point);
 
 protected:
     unsigned width, height;

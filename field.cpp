@@ -115,3 +115,8 @@ void Field::drawMeshOfField(Field MainField) {
         list_of_points[i].walkness = getFactor(list_of_points[i].coord);
     }
 }
+
+int Field::algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point) {
+    int shortestWay = -1; // Если значение в конце работы алгоритма останется -1, значит путь до объекта не найден (что-то не так)
+
+}
