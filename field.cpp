@@ -1,4 +1,5 @@
 #include "field.h"
+#include "pointOfMesh.h"
 
 Field::Field(unsigned w, unsigned h) {
     this->width = w;
@@ -93,18 +94,24 @@ float Field::getFactor(QPoint point) {
 
 // test commit
 
-void Field::drawGraphOfField(Field MainField) {
-    QVector <QPoint> list_of_points(0);
+void Field::drawMeshOfField(Field MainField) {
+    QVector <pointOfMesh> list_of_points(0);
     //int index = 0;
 
     // Создание списка из всех точек поля
     for(int i = 0; i < MainField.height; ++i) {
         for(int j = 0; j < MainField.width; ++j) {
-            QPoint point(i, j);
+            pointOfMesh point;
+            QPoint coords(i, j);
+            point.coord = coords;
+
             list_of_points.append(point);
             //++index;
         }
     }
 
-    // Присваивание точкам поля проходимости (в процессе)
+    // Присваивание точкам поля проходимости
+    for(int i = 0; i < MainField.width * MainField.height; ++i) {
+        list_of_points[i].walkness = getFactor(list_of_points[i].coord);
+    }
 }

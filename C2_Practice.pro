@@ -18,7 +18,8 @@ HEADERS += \
     canvas.h \
     field.h \
     mainwindow.h \
-    obstacle.h
+    obstacle.h \
+    pointOfMesh.h
 
 FORMS += \
     mainwindow.ui

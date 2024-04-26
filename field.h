@@ -29,7 +29,7 @@ public:
     void draw(QPainter* painter);
 
     // Algorithm Functions
-    void drawGraphOfField(Field MainField);
+    void drawMeshOfField(Field MainField);
 
 protected:
     unsigned width, height;
