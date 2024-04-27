@@ -64,6 +64,7 @@ void Field::resizeMap(unsigned w, unsigned h) {
     this->obstacles.clear();
     this->width = w;
     this->height = h;
+    makeMeshOfField();
 }
 
 unsigned Field::count() {
@@ -71,7 +72,22 @@ unsigned Field::count() {
 }
 
 void Field::draw(QPainter* painter) {
-    QPen p(Field::outline, Field::polyOutlineWidth);
+    QPen p;
+
+    if (debug) {
+        p.setWidth(1);
+        p.setColor(Qt::red);
+        painter->setBrush(Qt::yellow);
+        painter->setPen(p);
+        for (pointOfMesh& meshp : this->meshPoints) {
+            QPoint startPoint = meshp.coord;
+            QPoint endPoint = meshp.coord + QPoint(this->cellSize, this->cellSize);
+            painter->drawRect(startPoint.x(), startPoint.y(), endPoint.x(), endPoint.y());
+        }
+    }
+
+    p.setWidth(Field::polyOutlineWidth);
+    p.setColor(Field::outline);
     painter->setPen(p);
 
     for (Obstacle& obst : this->obstacles) {
@@ -167,26 +183,24 @@ bool Field::removeAt(QPoint point) {
 
 // test commit
 
-void Field::drawMeshOfField(Field MainField) {
-    QPoint coords(0, 0);
-    pointOfMesh point(coords, 0);
-    QVector <pointOfMesh> list_of_points(MainField.width * MainField.height, point);
+void Field::makeMeshOfField() {
+    this->meshPoints.clear();
 
     // Создание списка из всех точек поля
-    for(int i = 0; i < MainField.height; ++i) {
-        for(int j = 0; j < MainField.width; ++j) {
-            coords.setX(i);
-            coords.setY(j);
-            point.coord = coords;
+    for(unsigned i = 0; i < this->width; i += Field::cellSize) {
+        for(unsigned j = 0; j < this->height; j += Field::cellSize) {
+            QPoint point = QPoint(i, j);
+            float factor = getFactor(point);
+            pointOfMesh meshPoint(point, factor);
 
-            list_of_points.append(point);
+            this->meshPoints.append(meshPoint);
         }
     }
 
     // Присваивание точкам поля проходимости
-    for(int i = 0; i < MainField.width * MainField.height; ++i) {
-        list_of_points[i].walkness = getFactor(list_of_points[i].coord);
-    }
+    //for(unsigned i = 0; i < MainField.width * MainField.height; ++i) {
+    //    list_of_points[i].walkness = getFactor(list_of_points[i].coord);
+    //}
 }
 
 int Field::algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point) {

@@ -12,6 +12,10 @@
 
 class Field
 {
+    const bool debug = true;
+
+    const int cellSize = 16;
+
     const QColor outline = QColor(26, 26, 26);
     const QColor drawLastPoint = QColor(76, 76, 224);
     const QColor drawBorder = QColor(53, 51, 97);
@@ -48,7 +52,7 @@ public:
     void draw(QPainter* painter);
 
     // Algorithm Functions
-    void drawMeshOfField(Field MainField);
+    void makeMeshOfField();
     int algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point);
 
 protected:
@@ -56,6 +60,8 @@ protected:
     std::optional<QPoint> start, end;
     QPolygon drawing;
     QVector<Obstacle> obstacles;
+
+    QVector<pointOfMesh> meshPoints;
 };
 
 #endif // FIELD_H
