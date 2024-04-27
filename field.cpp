@@ -16,7 +16,7 @@ QColor mix(QColor c1, QColor c2, float factor) {
 
 // getPath...
 
-int Field::load(QString path) {
+int Field::loadMap(QString path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return -1;
     QXmlStreamReader xml(&file);
@@ -56,11 +56,11 @@ int Field::load(QString path) {
     return 0;
 }
 
-int Field::save(QString path) {
+int Field::saveMap(QString path) {
     return 0;
 }
 
-void Field::resize(unsigned w, unsigned h) {
+void Field::resizeMap(unsigned w, unsigned h) {
     this->obstacles.clear();
     this->width = w;
     this->height = h;
@@ -71,15 +71,35 @@ unsigned Field::count() {
 }
 
 void Field::draw(QPainter* painter) {
-    QPen p(Field::outline);
-    p.setWidth(Field::outlineWidth);
+    QPen p(Field::outline, Field::polyOutlineWidth);
     painter->setPen(p);
-    painter->setBrush(Qt::green);
 
     for (Obstacle& obst : this->obstacles) {
         QColor polyColor = mix(Field::fillEasy, Field::fillHard, obst.walkness);
         painter->setBrush(polyColor);
         painter->drawPolygon(obst.poly);
+    }
+
+    if (!this->drawing.empty()) {
+        p.setColor(Field::drawBorder);
+        painter->setPen(p);
+        painter->setBrush(Field::fillEasy);
+        painter->drawPolygon(this->drawing);
+        p.setColor(Field::drawLastPoint);
+        painter->setPen(p);
+        painter->setBrush(QColor(0, 0, 0, 0));
+        painter->drawEllipse(this->drawing.last(), 6, 6);
+    }
+
+    p.setWidth(Field::pointOutlineWidth);
+    painter->setPen(p);
+    if (this->start.has_value()) {
+        painter->setBrush(Field::fillStart);
+        painter->drawEllipse(this->start.value(), 4, 4);
+    }
+    if (this->end.has_value()) {
+        painter->setBrush(Field::fillEnd);
+        painter->drawEllipse(this->end.value(), 4, 4);
     }
 }
 
@@ -89,7 +109,60 @@ float Field::getFactor(QPoint point) {
             return obst.walkness;
         }
     }
-    return 1.;
+    return 0.;
+}
+
+void Field::setStart(QPoint s) {
+    this->start.emplace(s);
+}
+
+void Field::setEnd(QPoint s) {
+    this->end.emplace(s);
+}
+
+bool Field::addDraw(QPoint p) {
+    if (!this->drawing.empty()) {
+        QPolygon poly(this->drawing);
+        poly << p;
+        for (Obstacle& o : this->obstacles) {
+            if (o.poly.intersects(poly)) return false;
+        }
+    }
+    if (getFactor(p) != 0.) return false;
+    this->drawing << p;
+    return true;
+}
+
+void Field::removeDraw() {
+    if (!this->drawing.empty()) {
+        this->drawing.pop_back();
+    }
+}
+
+QPolygon Field::getDraw() {
+    return this->drawing;
+}
+
+void Field::finishDraw(float w) {
+    this->obstacles.append(Obstacle(this->drawing, w));
+    this->drawing.clear();
+}
+
+void Field::cancelDraw() {
+    this->drawing.clear();
+}
+
+bool Field::removeAt(QPoint point) {
+    int idx = -1;
+    for (int i = 0; i < this->obstacles.count(); i++) {
+        if (this->obstacles[i].poly.containsPoint(point, Qt::FillRule::OddEvenFill)) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx == -1) return false;
+    this->obstacles.removeAt(idx);
+    return true;
 }
 
 // test commit

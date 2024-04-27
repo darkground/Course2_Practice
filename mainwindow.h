@@ -18,6 +18,11 @@ public:
 private slots:
     void load();
     //void save();
+    void setStart();
+    void setEnd();
+    void createPoly();
+    void deletePoly();
+
     void coords(QPoint p);
     void objects(unsigned c);
     void status(QString s);
