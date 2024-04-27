@@ -37,11 +37,11 @@ bool Canvas::event(QEvent* e)
 {
     switch(e->type())
     {
-    case QEvent::HoverEnter: {
-        QHoverEvent* event = (QHoverEvent*)e;
-        qDebug() << Q_FUNC_INFO << event->type();
-        return true;
-    }
+    //case QEvent::HoverEnter: {
+    //    QHoverEvent* event = (QHoverEvent*)e;
+    //    qDebug() << Q_FUNC_INFO << event->type();
+    //    return true;
+    //}
     case QEvent::HoverLeave: {
         emit coords(QPoint(0, 0));
         return true;
