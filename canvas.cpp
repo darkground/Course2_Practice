@@ -55,7 +55,9 @@ bool Canvas::event(QEvent* e)
 void Canvas::mouseReleaseEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
-        qDebug() << "w =" << this->field->getFactor(event->pos());
+        QPoint pos = event->pos();
+        int w = this->field->getFactor(event->pos()) * 100;
+        emit status(QString("Непроходимость в [%1, %2] = %3").arg(pos.x()).arg(pos.y()).arg(w) + QString("%"));
     }
 }
 
@@ -66,16 +68,16 @@ void Canvas::load(QString path)
     int code = this->field->load(path);
     switch (code) {
     case -1:
-        emit status(QString("xml не найден"));
+        emit status(QString("Загрузка карты: XML-файл не найден"));
         break;
     case -2:
-        emit status(QString("нарушена структура xml-файла"));
+        emit status(QString("Загрузка карты: Структура XML-файла нарушена"));
         break;
     case -3:
-        emit status(QString("xml-файл хранит недопустимые значения"));
+        emit status(QString("Загрузка карты: XML-файл хранит недопустимые значения"));
         break;
     default:
-        emit status(QString("xml успешно загружен"));
+        emit status(QString("Загрузка карты: XML-файл успешно загружен"));
         emit objects(this->field->count());
         update();
         break;
