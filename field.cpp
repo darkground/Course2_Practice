@@ -247,17 +247,19 @@ int Field::algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_po
         }
         if(currentWay > shortestWay && shortestWay != 1) {
             current_point = ReverseEditPoint(change, current_point);
-            return 0;
+            return shortestWay;
         }
         visitedPoints.append(current_point);
         currentWay += current_point.walkness;
         if(current_point == finish_point) {
             if(shortestWay != -1 || currentWay < shortestWay) { // Если до этого момента не было найдено пути или новый путь короче, то заменяем кратчайший на текущий
+                shortestWayPoints.clear();
+                shortestWayPoints = visitedPoints;
                 shortestWay = currentWay;
                 currentWay -= current_point.walkness;
                 visitedPoints.pop_back();
                 current_point = ReverseEditPoint(change, current_point);
-                return 0;
+                return shortestWay;
             }
         }
         change = 1;
@@ -271,7 +273,7 @@ int Field::algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_po
     }
     else {
         current_point = ReverseEditPoint(change, current_point);
-        return 0;
+        return shortestWay;
     }
     return 0;
 }
