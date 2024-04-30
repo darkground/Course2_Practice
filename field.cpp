@@ -214,44 +214,38 @@ void Field::makeMesh() {
     qDebug() << "Mesh size" << this->mesh.size();
 }
 
-pointOfMesh Field::EditedPoint(int& change, pointOfMesh point) {
+pointOfMesh* Field::EditPoint(int change, pointOfMesh* point) {
     // 1 - увеличить x на 1, 2 - уменьшить x на 1, 3 - увеличить у на 1, 4 - уменьшить у на 1
+    QPoint coords = point->meshCoord;
     if(change == 1) {
-        point.meshCoord.rx()++;
-        point.realCoord.rx()+=1*cellSize;
+        return &mesh[QPoint(coords.x()+1, coords.y())];
     }
     else if(change == 2) {
-        point.meshCoord.rx()--;
-        point.realCoord.rx()-=1*cellSize;
+        return &mesh[QPoint(coords.x()-1, coords.y())];
     }
     else if(change == 3) {
-        point.meshCoord.ry()++;
-        point.realCoord.ry()+=1*cellSize;
+        return &mesh[QPoint(coords.x(), coords.y()+1)];
     }
     else if(change == 4) {
-        point.meshCoord.ry()--;
-        point.realCoord.ry()-=1*cellSize;
+        return &mesh[QPoint(coords.x(), coords.y()-1)];
     }
     return point;
 }
 
-pointOfMesh Field::ReverseEditedPoint(int& change, pointOfMesh point) {
+pointOfMesh* Field::ReverseEditPoint(int change, pointOfMesh* point) {
     // 2 - увеличить x на 1, 1 - уменьшить x на 1, 4 - увеличить у на 1, 3 - уменьшить у на 1
+    QPoint coords = point->meshCoord;
     if(change == 1) {
-        point.meshCoord.rx()--;
-        point.realCoord.rx()-=1*cellSize;
+        return &mesh[QPoint(coords.x()-1, coords.y())];
     }
     else if(change == 2) {
-        point.meshCoord.rx()++;
-        point.realCoord.rx()+=1*cellSize;
+        return &mesh[QPoint(coords.x()+1, coords.y())];
     }
     else if(change == 3) {
-        point.meshCoord.ry()--;
-        point.realCoord.ry()-=1*cellSize;
+        return &mesh[QPoint(coords.x(), coords.y()-1)];
     }
     else if(change == 4) {
-        point.meshCoord.ry()++;
-        point.realCoord.ry()+=1*cellSize;
+        return &mesh[QPoint(coords.x(), coords.y()+1)];
     }
     return point;
 }
@@ -274,7 +268,7 @@ bool Field::tryFindWay() {
     if (!this->start.has_value() || !this->end.has_value()) return false;
     pointOfMesh* start = pointOnMesh(this->start.value());
     pointOfMesh* end = pointOnMesh(this->end.value());
-    pointOfMesh current(*start);
+    //pointOfMesh current(*start);
     if (start == 0 || end == 0) return false;
     qDebug() << "Start mesh" << start->meshCoord << start->realCoord << this->start.value();
     qDebug() << "End mesh" << end->meshCoord << end->realCoord << this->end.value();
@@ -289,7 +283,7 @@ bool Field::tryFindWay() {
     float s = -1, c = 0;
     int ch = -1;
     this->way.clear();
-    float shortest = algorithmThatFindWay(*start, *end, current, vis, this->way, s, c, ch);
+    float shortest = algorithmThatFindWay(start, end, start, vis, this->way, s, c, ch);
     qDebug() << shortest;
     for (pointOfMesh& point : this->way) {
         qDebug() << "Way" << point.meshCoord;
@@ -299,63 +293,61 @@ bool Field::tryFindWay() {
 
 //// Алгоритм поиска пути
 float Field::algorithmThatFindWay(
-    pointOfMesh& start_point,
-    pointOfMesh& finish_point,
-    pointOfMesh current_point,
+    pointOfMesh* start_point,
+    pointOfMesh* finish_point,
+    pointOfMesh* current_point,
     QVector<pointOfMesh>& visitedPoints,
     QVector<pointOfMesh>& shortestWayPoints,
     float& shortestWay,
     float& currentWay,
     int& change
     ) {
-
-    if(this->mesh.contains(current_point.meshCoord)){ // Проверка, существует ли точка
-        if((int)current_point.walkness == 1) {
-            current_point = ReverseEditedPoint(change, current_point);
+    if(this->mesh.contains(current_point->meshCoord)){ // Проверка, существует ли точка
+        if((int)current_point->walkness == 1) {
+            current_point = ReverseEditPoint(change, current_point);
             return shortestWay;
         }
-        currentWay += current_point.walkness + 1;
+        currentWay += current_point->walkness + 1;
         if(currentWay > shortestWay && shortestWay != -1) {
-            currentWay -= current_point.walkness;
-            current_point = ReverseEditedPoint(change, current_point);
+            currentWay -= current_point->walkness;
+            current_point = ReverseEditPoint(change, current_point);
             return shortestWay;
         }
-        if(visitedPoints.contains(current_point)) {
-            currentWay -= current_point.walkness + 1;
-            current_point = ReverseEditedPoint(change, current_point);
+        if(visitedPoints.contains(*current_point)) {
+            currentWay -= current_point->walkness + 1;
+            current_point = ReverseEditPoint(change, current_point);
             return shortestWay;
         }
-        visitedPoints.append(current_point);
+        visitedPoints.append(*current_point);
         if(current_point == finish_point) {
             if(shortestWay == -1 || currentWay < shortestWay) { // Если до этого момента не было найдено пути или новый путь короче, то заменяем кратчайший на текущий
                 shortestWayPoints.clear();
                 shortestWayPoints = visitedPoints;
                 shortestWay = currentWay;
-                currentWay -= current_point.walkness;
+                currentWay -= current_point->walkness;
                 visitedPoints.pop_back();
-                current_point = ReverseEditedPoint(change, current_point);
+                current_point = ReverseEditPoint(change, current_point);
                 return shortestWay;
             }
         }
-        if(current_point.meshCoord.x() > finish_point.meshCoord.x()) {
+        if(current_point->meshCoord.x() > finish_point->meshCoord.x()) {
             change = 2;
-            algorithmThatFindWay(start_point, finish_point, EditedPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
+            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
         }
-        else if(current_point.meshCoord.x() < finish_point.meshCoord.x()) {
+        else if(current_point->meshCoord.x() < finish_point->meshCoord.x()) {
             change = 1;
-            algorithmThatFindWay(start_point, finish_point, EditedPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
+            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
         }
-        if(current_point.meshCoord.y() > finish_point.meshCoord.y()) {
+        if(current_point->meshCoord.y() > finish_point->meshCoord.y()) {
             change = 4;
-            algorithmThatFindWay(start_point, finish_point, EditedPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
+            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
         }
-        else if(current_point.meshCoord.y() < finish_point.meshCoord.y()) {
+        else if(current_point->meshCoord.y() < finish_point->meshCoord.y()) {
             change = 3;
-            algorithmThatFindWay(start_point, finish_point, EditedPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
+            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
         }
-            }
-    else {
-        current_point = ReverseEditedPoint(change, current_point);
+    } else {
+        current_point = ReverseEditPoint(change, current_point);
         return shortestWay;
     }
     return shortestWay;

@@ -58,10 +58,10 @@ public:
     void makeMesh();
     pointOfMesh* pointOnMesh(QPoint point);
 
-    pointOfMesh EditedPoint(int& change, pointOfMesh point);
-    pointOfMesh ReverseEditedPoint(int& change, pointOfMesh point);
+    pointOfMesh* EditPoint(int change, pointOfMesh* point);
+    pointOfMesh* ReverseEditPoint(int change, pointOfMesh* point);
     bool tryFindWay();
-    float algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point, pointOfMesh current_point, QVector<pointOfMesh>& visitedPoints, QVector<pointOfMesh>& shortestWayPoints, float& shortestWay, float& currentWay, int& change);
+    float algorithmThatFindWay(pointOfMesh* start_point, pointOfMesh* finish_point, pointOfMesh* current_point, QVector<pointOfMesh>& visitedPoints, QVector<pointOfMesh>& shortestWayPoints, float& shortestWay, float& currentWay, int& change);
 
 protected:
     unsigned width, height;
