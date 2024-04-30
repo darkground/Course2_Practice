@@ -15,8 +15,9 @@ class Field
 {
     const bool debug = true;
     const bool drawObstacles = false;
+    const bool drawPath = true;
 
-    const int cellSize = 10;
+    const int cellSize = 32;
 
     const QColor outline = QColor(26, 26, 26);
     const QColor drawLastPoint = QColor(76, 76, 224);

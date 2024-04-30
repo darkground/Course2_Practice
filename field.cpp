@@ -98,6 +98,16 @@ void Field::draw(QPainter* painter) {
         }
     }
 
+    if (drawPath && !way.empty()) {
+        p.setColor(Field::drawBorder);
+        painter->setPen(p);
+        for (int i = 1; i < way.length(); i++) {
+            pointOfMesh& prev = way[i-1];
+            pointOfMesh& next = way[i];
+            painter->drawLine(prev.realCoord, next.realCoord);
+        }
+    }
+
     if (!this->drawing.empty()) {
         p.setColor(Field::drawBorder);
         painter->setPen(p);
@@ -278,8 +288,12 @@ bool Field::tryFindWay() {
 
     float s = -1, c = 0;
     int ch = -1;
+    this->way.clear();
     float shortest = algorithmThatFindWay(*start, *end, current, vis, this->way, s, c, ch);
     qDebug() << shortest;
+    for (pointOfMesh& point : this->way) {
+        qDebug() << "Way" << point.meshCoord;
+    }
     return true;
 }
 
