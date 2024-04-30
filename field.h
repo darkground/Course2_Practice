@@ -53,7 +53,9 @@ public:
 
     // Algorithm Functions
     void makeMeshOfField();
-    int algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point);
+    pointOfMesh& EditPoint(int& change, pointOfMesh& point);
+    pointOfMesh& ReverseEditPoint(int& change, pointOfMesh& point);
+    int algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point, pointOfMesh& current_point,  QVector <pointOfMesh> visitedPoints, QVector <pointOfMesh> shortestWayPoints, int& shortestWay, int& currentWay, int& change);
 
 protected:
     unsigned width, height;

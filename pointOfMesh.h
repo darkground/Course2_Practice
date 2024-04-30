@@ -17,6 +17,10 @@ struct pointOfMesh {
         this->coord = p;
         this->walkness = w;
     }
+
+    bool operator == (const pointOfMesh& point) const {
+        return this->coord.x() == point.coord.x() && this->coord.y() == point.coord.y() && this->walkness == point.walkness;
+    }
 };
 
 #endif
