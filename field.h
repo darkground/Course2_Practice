@@ -7,14 +7,16 @@
 #include <QFile>
 #include <QDebug>
 #include <QXmlStreamReader>
+#include <QtMath>
 #include "obstacle.h"
 #include "pointOfMesh.h"
 
 class Field
 {
     const bool debug = true;
+    const bool drawObstacles = false;
 
-    const int cellSize = 16;
+    const int cellSize = 100;
 
     const QColor outline = QColor(26, 26, 26);
     const QColor drawLastPoint = QColor(76, 76, 224);
@@ -52,18 +54,22 @@ public:
     void draw(QPainter* painter);
 
     // Algorithm Functions
-    void makeMeshOfField();
-    pointOfMesh& EditPoint(int& change, pointOfMesh& point);
-    pointOfMesh& ReverseEditPoint(int& change, pointOfMesh& point);
-    int algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point, pointOfMesh& current_point,  QVector <pointOfMesh> visitedPoints, QVector <pointOfMesh> shortestWayPoints, int& shortestWay, int& currentWay, int& change);
+    void makeMesh();
+    pointOfMesh* pointOnMesh(QPoint point);
+
+    pointOfMesh EditedPoint(int& change, pointOfMesh point);
+    pointOfMesh ReverseEditedPoint(int& change, pointOfMesh point);
+    bool tryFindWay();
+    int algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point, pointOfMesh current_point, QVector<pointOfMesh>& visitedPoints, QVector<pointOfMesh>& shortestWayPoints, int& shortestWay, int& currentWay, int& change);
 
 protected:
     unsigned width, height;
     std::optional<QPoint> start, end;
     QPolygon drawing;
     QVector<Obstacle> obstacles;
+    QVector<pointOfMesh> way;
 
-    QVector<pointOfMesh> meshPoints;
+    QHash<QPoint, pointOfMesh> mesh;
 };
 
 #endif // FIELD_H
