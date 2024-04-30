@@ -18,8 +18,9 @@ HEADERS += \
     canvas.h \
     field.h \
     mainwindow.h \
+    meshpoint.h \
     obstacle.h \
-    pointOfMesh.h
+    prioqueue.h
 
 FORMS += \
     mainwindow.ui
