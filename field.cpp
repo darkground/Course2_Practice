@@ -1,4 +1,5 @@
 #include "field.h"
+#include "prioqueue.h"
 
 Field::Field(unsigned w, unsigned h) {
     this->width = w;
@@ -76,7 +77,7 @@ void Field::draw(QPainter* painter) {
     QPen p;
 
     if (debug) {
-        p.setColor(QColor(0, 0, 0, 50));
+        p.setColor(QColor(0, 0, 0, 0));
         painter->setPen(p);
         for (auto it = this->mesh.keyValueBegin(); it != this->mesh.keyValueEnd(); ++it) {
             QPoint startPoint = it->second.realCoord;
@@ -102,8 +103,8 @@ void Field::draw(QPainter* painter) {
         p.setColor(Field::drawBorder);
         painter->setPen(p);
         for (int i = 1; i < way.length(); i++) {
-            pointOfMesh& prev = way[i-1];
-            pointOfMesh& next = way[i];
+            MeshPoint& prev = way[i-1];
+            MeshPoint& next = way[i];
             painter->drawLine(prev.realCoord, next.realCoord);
         }
     }
@@ -205,7 +206,7 @@ void Field::makeMesh() {
             QPoint meshCoord = QPoint(i, j);
             QPoint realCoord = QPoint(i * Field::cellSize, j * Field::cellSize);
             float factor = getFactor(realCoord);
-            pointOfMesh mesh(meshCoord, realCoord, factor);
+            MeshPoint mesh(meshCoord, realCoord, factor);
 
             this->mesh[meshCoord] = mesh;
         }
@@ -214,47 +215,20 @@ void Field::makeMesh() {
     qDebug() << "Mesh size" << this->mesh.size();
 }
 
-pointOfMesh* Field::EditPoint(int change, pointOfMesh* point) {
-    // 1 - увеличить x на 1, 2 - уменьшить x на 1, 3 - увеличить у на 1, 4 - уменьшить у на 1
-    QPoint coords = point->meshCoord;
-    if(change == 1) {
-        return &mesh[QPoint(coords.x()+1, coords.y())];
-    }
-    else if(change == 2) {
-        return &mesh[QPoint(coords.x()-1, coords.y())];
-    }
-    else if(change == 3) {
-        return &mesh[QPoint(coords.x(), coords.y()+1)];
-    }
-    else if(change == 4) {
-        return &mesh[QPoint(coords.x(), coords.y()-1)];
-    }
-    return point;
+QVector<MeshPoint*> Field::neighbors(MeshPoint point) {
+    QVector<MeshPoint*> nei;
+    if (mesh.contains(QPoint(point.meshCoord.x()+1, point.meshCoord.y()))) nei.append(&mesh[QPoint(point.meshCoord.x()+1, point.meshCoord.y())]);
+    if (mesh.contains(QPoint(point.meshCoord.x(), point.meshCoord.y()+1))) nei.append(&mesh[QPoint(point.meshCoord.x(), point.meshCoord.y()+1)]);
+    if (mesh.contains(QPoint(point.meshCoord.x()-1, point.meshCoord.y()))) nei.append(&mesh[QPoint(point.meshCoord.x()-1, point.meshCoord.y())]);
+    if (mesh.contains(QPoint(point.meshCoord.x(), point.meshCoord.y()-1))) nei.append(&mesh[QPoint(point.meshCoord.x(), point.meshCoord.y()-1)]);
+    return nei;
 }
 
-pointOfMesh* Field::ReverseEditPoint(int change, pointOfMesh* point) {
-    // 2 - увеличить x на 1, 1 - уменьшить x на 1, 4 - увеличить у на 1, 3 - уменьшить у на 1
-    QPoint coords = point->meshCoord;
-    if(change == 1) {
-        return &mesh[QPoint(coords.x()-1, coords.y())];
-    }
-    else if(change == 2) {
-        return &mesh[QPoint(coords.x()+1, coords.y())];
-    }
-    else if(change == 3) {
-        return &mesh[QPoint(coords.x(), coords.y()-1)];
-    }
-    else if(change == 4) {
-        return &mesh[QPoint(coords.x(), coords.y()+1)];
-    }
-    return point;
-}
-
-pointOfMesh* Field::pointOnMesh(QPoint point) {
-    pointOfMesh* shortestMesh = 0;
+MeshPoint* Field::pointOnMesh(QPoint point) {
+    MeshPoint* shortestMesh = 0;
     float shortestDist = this->width * this->height;
     for (auto it = this->mesh.keyValueBegin(); it != this->mesh.keyValueEnd(); ++it) {
-        pointOfMesh& mesh = it->second;
+        MeshPoint& mesh = it->second;
         float dist = qSqrt(qPow(mesh.realCoord.x() - point.x(), 2) + qPow(mesh.realCoord.y() - point.y(), 2));
         if (dist < shortestDist) {
             shortestDist = dist;
@@ -264,91 +238,53 @@ pointOfMesh* Field::pointOnMesh(QPoint point) {
     return shortestMesh;
 }
 
-bool Field::tryFindWay() {
-    if (!this->start.has_value() || !this->end.has_value()) return false;
-    pointOfMesh* start = pointOnMesh(this->start.value());
-    pointOfMesh* end = pointOnMesh(this->end.value());
-    //pointOfMesh current(*start);
+float Field::find() {
+    if (!this->start.has_value() || !this->end.has_value()) return -1;
+    MeshPoint* start = pointOnMesh(this->start.value());
+    MeshPoint* end = pointOnMesh(this->end.value());
     if (start == 0 || end == 0) return false;
-    qDebug() << "Start mesh" << start->meshCoord << start->realCoord << this->start.value();
-    qDebug() << "End mesh" << end->meshCoord << end->realCoord << this->end.value();
-    QVector<pointOfMesh> vis;
 
-    qDebug() << "Generating";
-    for (auto it = this->mesh.keyValueBegin(); it != this->mesh.keyValueEnd(); ++it) {
-        pointOfMesh& meshp = it->second;
-        qDebug() << "Mesh meshCoord =" << meshp.meshCoord << "; realCoord =" << meshp.realCoord << "; walkness =" << meshp.walkness;
-    }
-
-    float s = -1, c = 0;
-    int ch = -1;
     this->way.clear();
-    float shortest = algorithmThatFindWay(start, end, start, vis, this->way, s, c, ch);
-    qDebug() << shortest;
-    for (pointOfMesh& point : this->way) {
-        qDebug() << "Way" << point.meshCoord;
-    }
-    return true;
+    float shortest = dijkstra(start, end, this->way);
+    return shortest;
 }
 
-//// Алгоритм поиска пути
-float Field::algorithmThatFindWay(
-    pointOfMesh* start_point,
-    pointOfMesh* finish_point,
-    pointOfMesh* current_point,
-    QVector<pointOfMesh>& visitedPoints,
-    QVector<pointOfMesh>& shortestWayPoints,
-    float& shortestWay,
-    float& currentWay,
-    int& change
-    ) {
-    if(this->mesh.contains(current_point->meshCoord)){ // Проверка, существует ли точка
-        if((int)current_point->walkness == 1) {
-            current_point = ReverseEditPoint(change, current_point);
-            return shortestWay;
-        }
-        currentWay += current_point->walkness + 1;
-        if(currentWay > shortestWay && shortestWay != -1) {
-            currentWay -= current_point->walkness;
-            current_point = ReverseEditPoint(change, current_point);
-            return shortestWay;
-        }
-        if(visitedPoints.contains(*current_point)) {
-            currentWay -= current_point->walkness + 1;
-            current_point = ReverseEditPoint(change, current_point);
-            return shortestWay;
-        }
-        visitedPoints.append(*current_point);
-        if(current_point == finish_point) {
-            if(shortestWay == -1 || currentWay < shortestWay) { // Если до этого момента не было найдено пути или новый путь короче, то заменяем кратчайший на текущий
-                shortestWayPoints.clear();
-                shortestWayPoints = visitedPoints;
-                shortestWay = currentWay;
-                currentWay -= current_point->walkness;
-                visitedPoints.pop_back();
-                current_point = ReverseEditPoint(change, current_point);
-                return shortestWay;
+// Алгоритм поиска пути Дейкстры
+float Field::dijkstra(MeshPoint* start_point, MeshPoint* finish_point, QVector<MeshPoint>& shortestWay) {
+    shortestWay.clear();
+    PriorityQueue<MeshPoint*, float> queue;
+    queue.put(start_point, 1.);
+
+    QHash<QPoint, QPoint> came_from;
+    QHash<QPoint, float> cost_so_far;
+    came_from[start_point->meshCoord] = start_point->meshCoord;
+    cost_so_far[start_point->meshCoord] = 1.;
+    
+    while (!queue.empty()) {
+        MeshPoint* current = queue.get();
+        if (current == finish_point) break;
+
+        for (MeshPoint* neighbor : neighbors(*current)) {
+            if (neighbor->walkness < 1.) {
+                float new_cost = cost_so_far[current->meshCoord] + 1 + neighbor->walkness;
+                if (!cost_so_far.contains(neighbor->meshCoord) || new_cost < cost_so_far[neighbor->meshCoord]) {
+                    cost_so_far[neighbor->meshCoord] = new_cost;
+                    came_from[neighbor->meshCoord] = current->meshCoord;
+                    queue.put(neighbor, new_cost);
+                }
             }
         }
-        if(current_point->meshCoord.x() > finish_point->meshCoord.x()) {
-            change = 2;
-            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
-        }
-        else if(current_point->meshCoord.x() < finish_point->meshCoord.x()) {
-            change = 1;
-            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
-        }
-        if(current_point->meshCoord.y() > finish_point->meshCoord.y()) {
-            change = 4;
-            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
-        }
-        else if(current_point->meshCoord.y() < finish_point->meshCoord.y()) {
-            change = 3;
-            algorithmThatFindWay(start_point, finish_point, EditPoint(change, current_point), visitedPoints, shortestWayPoints, shortestWay, currentWay, change);
-        }
-    } else {
-        current_point = ReverseEditPoint(change, current_point);
-        return shortestWay;
     }
-    return shortestWay;
+
+    QPoint current = finish_point->meshCoord;
+    if (!came_from.contains(current)) return 0;
+    float cost = cost_so_far[finish_point->meshCoord];
+    while (current != start_point->meshCoord) {
+        MeshPoint mesh = this->mesh[current];
+        shortestWay.append(mesh);
+        current = came_from[current];
+    }
+    shortestWay.append(*start_point);
+    std::reverse(shortestWay.begin(), shortestWay.end());
+    return cost;
 }
