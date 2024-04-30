@@ -39,6 +39,7 @@ protected:
     Field* field = 0;
     CanvasAction action = WALKNESS;
 
+    void showEvent(QShowEvent* event);
     void paintEvent(QPaintEvent*);
     bool event(QEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);

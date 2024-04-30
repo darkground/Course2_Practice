@@ -3,8 +3,6 @@
 
 Canvas::Canvas(QWidget* parent) : QWidget(parent) {
     setAttribute(Qt::WA_Hover);
-    QSize canvasSize = size();
-    this->field = new Field(canvasSize.width(), canvasSize.height());
 }
 
 Canvas::~Canvas() {
@@ -57,6 +55,12 @@ bool Canvas::event(QEvent* e)
     return QWidget::event(e);
 }
 
+void Canvas::showEvent(QShowEvent* e)
+{
+    QSize canvasSize = minimumSize();
+    this->field = new Field(canvasSize.width(), canvasSize.height());
+}
+
 void Canvas::mouseReleaseEvent(QMouseEvent* event)
 {
     switch (this->action) {
@@ -76,8 +80,9 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
         } else {
             emit status(QString("Старт: установка отменена"));
         }
-        update();
+        this->field->tryFindWay();
         this->action = WALKNESS;
+        update();
         break;
     }
     case END: {
@@ -88,6 +93,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
         } else {
             emit status(QString("Финиш: действие отменено"));
         }
+        this->field->tryFindWay();
         this->action = WALKNESS;
         update();
         break;
