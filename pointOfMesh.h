@@ -10,16 +10,27 @@
 #include <QDebug>
 
 struct pointOfMesh {
-    QPoint coord;
+    QPoint meshCoord;
+    QPoint realCoord;
     float walkness;
 
-    pointOfMesh(QPoint p, float w) {
-        this->coord = p;
+    pointOfMesh() = default;
+
+    pointOfMesh(QPoint m, QPoint p, float w) {
+        this->meshCoord = m;
+        this->realCoord = p;
         this->walkness = w;
     }
 
+    //pointOfMesh(const pointOfMesh& mesh) {
+    //    this->meshCoord = QPoint(mesh.meshCoord);
+    //    this->realCoord = QPoint(mesh.realCoord);
+    //    this->walkness = mesh.walkness;
+    //}
+
     bool operator == (const pointOfMesh& point) const {
-        return this->coord.x() == point.coord.x() && this->coord.y() == point.coord.y() && this->walkness == point.walkness;
+        return this->meshCoord == point.meshCoord;
+        //return this->coord.x() == point.coord.x() && this->coord.y() == point.coord.y() && this->walkness == point.walkness;
     }
 };
 
