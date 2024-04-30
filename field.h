@@ -16,7 +16,7 @@ class Field
     const bool debug = true;
     const bool drawObstacles = false;
 
-    const int cellSize = 100;
+    const int cellSize = 10;
 
     const QColor outline = QColor(26, 26, 26);
     const QColor drawLastPoint = QColor(76, 76, 224);
@@ -60,7 +60,7 @@ public:
     pointOfMesh EditedPoint(int& change, pointOfMesh point);
     pointOfMesh ReverseEditedPoint(int& change, pointOfMesh point);
     bool tryFindWay();
-    int algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point, pointOfMesh current_point, QVector<pointOfMesh>& visitedPoints, QVector<pointOfMesh>& shortestWayPoints, int& shortestWay, int& currentWay, int& change);
+    float algorithmThatFindWay(pointOfMesh& start_point, pointOfMesh& finish_point, pointOfMesh current_point, QVector<pointOfMesh>& visitedPoints, QVector<pointOfMesh>& shortestWayPoints, float& shortestWay, float& currentWay, int& change);
 
 protected:
     unsigned width, height;

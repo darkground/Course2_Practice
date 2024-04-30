@@ -276,28 +276,29 @@ bool Field::tryFindWay() {
         qDebug() << "Mesh meshCoord =" << meshp.meshCoord << "; realCoord =" << meshp.realCoord << "; walkness =" << meshp.walkness;
     }
 
-    int s = -1, c = 0, ch = -1;
-    int shortest = algorithmThatFindWay(*start, *end, current, vis, this->way, s, c, ch);
+    float s = -1, c = 0;
+    int ch = -1;
+    float shortest = algorithmThatFindWay(*start, *end, current, vis, this->way, s, c, ch);
     qDebug() << shortest;
     return true;
 }
 
 //// Алгоритм поиска пути
-int Field::algorithmThatFindWay(
+float Field::algorithmThatFindWay(
     pointOfMesh& start_point,
     pointOfMesh& finish_point,
     pointOfMesh current_point,
     QVector<pointOfMesh>& visitedPoints,
     QVector<pointOfMesh>& shortestWayPoints,
-    int& shortestWay,
-    int& currentWay,
+    float& shortestWay,
+    float& currentWay,
     int& change
     ) {
 
     if(this->mesh.contains(current_point.meshCoord)){ // Проверка, существует ли точка
         if(current_point.walkness == 1) {
             current_point = ReverseEditedPoint(change, current_point);
-            return 0;
+            return shortestWay;
         }
         currentWay += current_point.walkness + 1;
         if(currentWay > shortestWay && shortestWay != -1) {
