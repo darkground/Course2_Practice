@@ -12,6 +12,7 @@
 class Field
 {
     const QColor outline = QColor(26, 26, 26);
+    const QColor drawPoint = QColor(0, 4, 64);
     const QColor drawLastPoint = QColor(76, 76, 224);
     const QColor drawBorder = QColor(53, 51, 97);
 

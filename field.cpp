@@ -84,10 +84,16 @@ void Field::draw(QPainter* painter) {
         painter->setPen(p);
         painter->setBrush(Field::fillEasy);
         painter->drawPolygon(this->drawing);
-        p.setColor(Field::drawLastPoint);
-        painter->setPen(p);
         painter->setBrush(QColor(0, 0, 0, 0));
-        painter->drawEllipse(this->drawing.last(), 6, 6);
+        for (QPoint& point : this->drawing) {
+            if (point == this->drawing.last()) {
+                p.setColor(Field::drawLastPoint);
+            } else {
+                p.setColor(Field::drawPoint);
+            }
+            painter->setPen(p);
+            painter->drawEllipse(point, 6, 6);
+        }
     }
 
     p.setWidth(Field::pointOutlineWidth);
