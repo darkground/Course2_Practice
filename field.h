@@ -10,18 +10,21 @@
 #include <QtMath>
 #include "obstacle.h"
 #include "meshpoint.h"
+#include "prioqueue.h"
 
 class Field
 {
-    const bool debug = true;
-    const bool drawObstacles = false;
+    const bool debug = false;
+    const bool drawObstacles = true;
     const bool drawPath = true;
 
+    const int pathSmoothing = 8;
     const int cellSize = 2;
 
     const QColor outline = QColor(26, 26, 26);
     const QColor drawLastPoint = QColor(76, 76, 224);
     const QColor drawBorder = QColor(53, 51, 97);
+    const QColor drawPathline = QColor(99, 255, 82);
 
     const float polyOutlineWidth = 2.f;
     const float pointOutlineWidth = 0.8f;
@@ -58,8 +61,8 @@ public:
     void makeMesh();
     MeshPoint* pointOnMesh(QPoint point);
 
-    QVector<MeshPoint*> neighbors(MeshPoint point);
     float find();
+    void dijkstra_neighbor(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& came_from, QHash<QPoint, float>& cost_so_far, MeshPoint* current, QPoint offset);
     float dijkstra(MeshPoint* start_point, MeshPoint* finish_point, QVector<MeshPoint>& shortestWayPoints);
 
 protected:

@@ -1,5 +1,4 @@
 #include "field.h"
-#include "prioqueue.h"
 
 Field::Field(unsigned w, unsigned h) {
     this->width = w;
@@ -77,7 +76,7 @@ void Field::draw(QPainter* painter) {
     QPen p;
 
     if (debug) {
-        p.setColor(QColor(0, 0, 0, 0));
+        p.setColor(QColor(0, 0, 0, 50));
         painter->setPen(p);
         for (auto it = this->mesh.keyValueBegin(); it != this->mesh.keyValueEnd(); ++it) {
             QPoint startPoint = it->second.realCoord;
@@ -99,15 +98,18 @@ void Field::draw(QPainter* painter) {
         }
     }
 
-    if (drawPath && !way.empty()) {
-        p.setColor(Field::drawBorder);
+    if (drawPath) {
+        p.setColor(Field::drawPathline);
         painter->setPen(p);
-        for (int i = 1; i < way.length(); i++) {
-            MeshPoint& prev = way[i-1];
-            MeshPoint& next = way[i];
+        for (int i = 1; i * Field::pathSmoothing < way.length(); i++) {
+            MeshPoint& prev = way[(i-1) * Field::pathSmoothing];
+            MeshPoint& next = way[i * Field::pathSmoothing];
             painter->drawLine(prev.realCoord, next.realCoord);
         }
     }
+
+    p.setColor(Field::outline);
+    painter->setPen(p);
 
     if (!this->drawing.empty()) {
         p.setColor(Field::drawBorder);
@@ -215,15 +217,6 @@ void Field::makeMesh() {
     qDebug() << "Mesh size" << this->mesh.size();
 }
 
-QVector<MeshPoint*> Field::neighbors(MeshPoint point) {
-    QVector<MeshPoint*> nei;
-    if (mesh.contains(QPoint(point.meshCoord.x()+1, point.meshCoord.y()))) nei.append(&mesh[QPoint(point.meshCoord.x()+1, point.meshCoord.y())]);
-    if (mesh.contains(QPoint(point.meshCoord.x(), point.meshCoord.y()+1))) nei.append(&mesh[QPoint(point.meshCoord.x(), point.meshCoord.y()+1)]);
-    if (mesh.contains(QPoint(point.meshCoord.x()-1, point.meshCoord.y()))) nei.append(&mesh[QPoint(point.meshCoord.x()-1, point.meshCoord.y())]);
-    if (mesh.contains(QPoint(point.meshCoord.x(), point.meshCoord.y()-1))) nei.append(&mesh[QPoint(point.meshCoord.x(), point.meshCoord.y()-1)]);
-    return nei;
-}
-
 MeshPoint* Field::pointOnMesh(QPoint point) {
     MeshPoint* shortestMesh = 0;
     float shortestDist = this->width * this->height;
@@ -249,6 +242,25 @@ float Field::find() {
     return shortest;
 }
 
+void Field::dijkstra_neighbor(
+    PriorityQueue<MeshPoint*, float>& queue,
+    QHash<QPoint, QPoint>& came_from,
+    QHash<QPoint, float>& cost_so_far,
+    MeshPoint* current,
+    QPoint offset
+    ) {
+    QPoint off = current->meshCoord + offset;
+    if (!mesh.contains(off)) return;
+    MeshPoint* neighbor = &mesh[off];
+    if (neighbor->walkness >= 1.) return;
+    float new_cost = cost_so_far[current->meshCoord] + 1 + neighbor->walkness;
+    if (!cost_so_far.contains(neighbor->meshCoord) || new_cost < cost_so_far[neighbor->meshCoord]) {
+        cost_so_far[neighbor->meshCoord] = new_cost;
+        came_from[neighbor->meshCoord] = current->meshCoord;
+        queue.put(neighbor, new_cost);
+    }
+}
+
 // Алгоритм поиска пути Дейкстры
 float Field::dijkstra(MeshPoint* start_point, MeshPoint* finish_point, QVector<MeshPoint>& shortestWay) {
     shortestWay.clear();
@@ -264,16 +276,10 @@ float Field::dijkstra(MeshPoint* start_point, MeshPoint* finish_point, QVector<M
         MeshPoint* current = queue.get();
         if (current == finish_point) break;
 
-        for (MeshPoint* neighbor : neighbors(*current)) {
-            if (neighbor->walkness < 1.) {
-                float new_cost = cost_so_far[current->meshCoord] + 1 + neighbor->walkness;
-                if (!cost_so_far.contains(neighbor->meshCoord) || new_cost < cost_so_far[neighbor->meshCoord]) {
-                    cost_so_far[neighbor->meshCoord] = new_cost;
-                    came_from[neighbor->meshCoord] = current->meshCoord;
-                    queue.put(neighbor, new_cost);
-                }
-            }
-        }
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(1, 0));
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(0, 1));
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(-1, 0));
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(0, -1));
     }
 
     QPoint current = finish_point->meshCoord;
