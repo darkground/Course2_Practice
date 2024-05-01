@@ -33,7 +33,7 @@ void Canvas::setAction(CanvasAction a) {
     this->action = a;
 }
 
-void Canvas::showEvent(QShowEvent* e)
+void Canvas::showEvent(QShowEvent*)
 {
     QSize canvasSize = minimumSize();
     this->field = new Field(canvasSize.width(), canvasSize.height());
