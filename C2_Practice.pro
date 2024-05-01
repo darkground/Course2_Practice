@@ -20,7 +20,8 @@ HEADERS += \
     mainwindow.h \
     meshpoint.h \
     obstacle.h \
-    prioqueue.h
+    prioqueue.h \
+    utils.h
 
 FORMS += \
     mainwindow.ui

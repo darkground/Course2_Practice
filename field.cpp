@@ -1,17 +1,10 @@
 #include "field.h"
+#include "utils.h"
 
 Field::Field(unsigned w, unsigned h) {
     this->width = w;
     this->height = h;
     makeMesh();
-}
-
-QColor mix(QColor c1, QColor c2, float factor) {
-    return QColor(
-        c1.red() * (1 - factor) + c2.red(),
-        c1.green() * (1 - factor) + c2.green(),
-        c1.blue() * (1 - factor) + c2.blue()
-    );
 }
 
 int Field::loadMap(QString path) {
@@ -292,29 +285,6 @@ bool Field::removePointAt(QPoint point) {
         }
     }
     return true;
-}
-
-QPoint nearestPoint(QLine& liner, QPoint& pointr){
-    double APx = pointr.x() - liner.x1();
-    double APy = pointr.y() - liner.y1();
-    double ABx = liner.x2() - liner.x1();
-    double ABy = liner.y2() - liner.y1();
-    double magAB2 = ABx*ABx + ABy*ABy;
-    double ABdotAP = ABx*APx + ABy*APy;
-    double t = ABdotAP / magAB2;
-
-    QPoint newPoint;
-
-    if (t < 0) {
-        newPoint = liner.p1();
-    }else if (t > 1){
-        newPoint = liner.p2();
-    }else{
-        newPoint.setX(liner.x1() + ABx*t);
-        newPoint.setY(liner.y1() + ABy*t);
-    }
-
-    return newPoint;
 }
 
 bool Field::addPointAt(QPoint point) {
