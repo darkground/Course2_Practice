@@ -187,7 +187,6 @@ bool Field::addDraw(QPoint p) {
 
 void Field::removeDraw() {
     if (!this->drawing.empty()) {
-        this->makeMesh();
         this->drawing.pop_back();
     }
 }
