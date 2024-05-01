@@ -306,7 +306,6 @@ bool Field::addPointAt(QPoint point) {
             break;
         }
     }
-    qDebug() << idx;
     if (idx == -1) return false;
     poly->insert(idx, point);
     return true;
