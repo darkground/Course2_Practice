@@ -3,8 +3,6 @@
 
 Canvas::Canvas(QWidget* parent) : QWidget(parent) {
     setAttribute(Qt::WA_Hover);
-    QSize canvasSize = size();
-    this->field = new Field(canvasSize.width(), canvasSize.height());
 }
 
 Canvas::~Canvas() {
@@ -17,10 +15,28 @@ void Canvas::setAction(CanvasAction a) {
             this->field->cancelDraw();
             update();
             break;
+        case POLYGON_EDIT:
+            this->field->endDrag();
+            update();
+            break;
+        default:
+            break;
+    }
+    switch (a) {
+        case POLYGON_EDIT:
+            this->field->startDrag();
+            update();
+            break;
         default:
             break;
     }
     this->action = a;
+}
+
+void Canvas::showEvent(QShowEvent* e)
+{
+    QSize canvasSize = minimumSize();
+    this->field = new Field(canvasSize.width(), canvasSize.height());
 }
 
 void Canvas::paintEvent(QPaintEvent*)
@@ -57,6 +73,45 @@ bool Canvas::event(QEvent* e)
             break;
     }
     return QWidget::event(e);
+}
+
+void Canvas::mousePressEvent(QMouseEvent* event) {
+    switch (this->action) {
+        case POLYGON_EDIT: {
+            if (event->button() == Qt::LeftButton) {
+                QPoint pos = event->pos();
+                if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                    this->field->startDrag(pos);
+                } else {
+                    bool r = this->field->addPointAt(pos);
+                    if (r) {
+                        emit status(QString("Изменение препятствия: добавил точку в [%1, %2]").arg(pos.x()).arg(pos.y()));
+                    } else {
+                        emit status(QString("Изменение препятствия: некуда добавлять точку"));
+                    }
+                }
+            }
+            update();
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void Canvas::mouseMoveEvent(QMouseEvent* event) {
+    switch (this->action) {
+        case POLYGON_EDIT: {
+            QPoint pos = event->pos();
+            if (this->field->toDrag(pos)) {
+                emit status(QString("Изменение препятствия: точка перемещена в [%1, %2]").arg(pos.x()).arg(pos.y()));
+                update();
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent* event)
@@ -99,14 +154,14 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
                     if (this->field->addDraw(event->pos())) {
                         int c = this->field->getDraw().count();
-                        emit status(QString("%1 точек: [ЛКМ] Добавить точку, [Shift+ЛКМ] Убрать точку, [ПКМ] Завершить, [Shift+ПКМ] Отмена").arg(c));
+                        emit status(QString("Создание препятствия: %1 точек").arg(c));
                     } else {
                         emit status(QString("Создание препятствия: препятствия не должны пересекаться"));
                     }
                 } else {
                     this->field->removeDraw();
                     int c = this->field->getDraw().count();
-                    emit status(QString("%1 точек: [ЛКМ] Добавить точку, [Shift+ЛКМ] Убрать точку, [ПКМ] Завершить, [Shift+ПКМ] Отмена").arg(c));
+                    emit status(QString("Создание препятствия: %1 точек").arg(c));
                 }
             } else if (event->button() == Qt::RightButton) {
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
@@ -129,7 +184,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
         }
         case POLYGON_DELETE: {
             if (event->button() == Qt::LeftButton) {
-                if (this->field->removeAt(event->pos())) {
+                if (this->field->removePolyAt(event->pos())) {
                     emit objects(this->field->count());
                     emit status(QString("Удаление препятствия: удалено"));
                     this->action = WALKNESS;
@@ -139,6 +194,27 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
             } else if (event->button() == Qt::RightButton) {
                 emit status(QString("Удаление препятствия: действие отменено"));
                 this->action = WALKNESS;
+            }
+            update();
+            break;
+        }
+        case POLYGON_EDIT: {
+            if (event->button() == Qt::LeftButton) {
+                this->field->endDrag(false);
+            } else {
+                if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                    bool r = this->field->removePointAt(event->pos());
+                    if (r) {
+                        emit objects(this->field->count());
+                        emit status(QString("Изменение препятствия: точка удалена"));
+                    } else {
+                        emit status(QString("Изменение препятствия: точка не найдена"));
+                    }
+                } else {
+                    this->field->endDrag();
+                    emit status(QString("Изменение препятствия: действие отменено"));
+                    this->action = WALKNESS;
+                }
             }
             update();
             break;
