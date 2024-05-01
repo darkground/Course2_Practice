@@ -1,6 +1,7 @@
 msvc_make.bat
 .qtc_clangd
 .qmake.stash
+.vscode
 debug/
 release/
 
