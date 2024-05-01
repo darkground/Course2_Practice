@@ -14,8 +14,6 @@ QColor mix(QColor c1, QColor c2, float factor) {
     );
 }
 
-// getPath...
-
 int Field::loadMap(QString path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return -1;
