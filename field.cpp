@@ -389,11 +389,16 @@ float Field::find() {
     return shortest;
 }
 
+int heuristic(QPoint p1, QPoint p2) {
+    return std::abs(p1.x() - p2.x()) + std::abs(p1.y() - p2.y());
+}
+
 void Field::dijkstra_neighbor(
     PriorityQueue<MeshPoint*, float>& queue,
     QHash<QPoint, QPoint>& came_from,
     QHash<QPoint, float>& cost_so_far,
     MeshPoint* current,
+    MeshPoint* finish,
     QPoint offset
     ) {
     QPoint off = current->meshCoord + offset;
@@ -404,7 +409,7 @@ void Field::dijkstra_neighbor(
     if (!cost_so_far.contains(neighbor->meshCoord) || new_cost < cost_so_far[neighbor->meshCoord]) {
         cost_so_far[neighbor->meshCoord] = new_cost;
         came_from[neighbor->meshCoord] = current->meshCoord;
-        queue.put(neighbor, new_cost);
+        queue.put(neighbor, new_cost + heuristic(neighbor->meshCoord, finish->meshCoord));
     }
 }
 
@@ -423,10 +428,10 @@ float Field::dijkstra(MeshPoint* start_point, MeshPoint* finish_point, QVector<M
         MeshPoint* current = queue.get();
         if (current == finish_point) break;
 
-        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(1, 0));
-        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(0, 1));
-        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(-1, 0));
-        dijkstra_neighbor(queue, came_from, cost_so_far, current, QPoint(0, -1));
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, finish_point, QPoint(1, 0));
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, finish_point, QPoint(0, 1));
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, finish_point, QPoint(-1, 0));
+        dijkstra_neighbor(queue, came_from, cost_so_far, current, finish_point, QPoint(0, -1));
     }
 
     QPoint current = finish_point->meshCoord;

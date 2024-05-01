@@ -73,7 +73,7 @@ public:
     MeshPoint* pointOnMesh(QPoint point);
 
     float find();
-    void dijkstra_neighbor(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& came_from, QHash<QPoint, float>& cost_so_far, MeshPoint* current, QPoint offset);
+    void dijkstra_neighbor(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& came_from, QHash<QPoint, float>& cost_so_far, MeshPoint* current, MeshPoint* finish, QPoint offset);
     float dijkstra(MeshPoint* start_point, MeshPoint* finish_point, QVector<MeshPoint>& shortestWayPoints);
 
 protected:
