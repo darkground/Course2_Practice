@@ -214,6 +214,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
                     }
                 } else {
                     this->field->endDrag();
+                    this->field->makeMesh();
                     emit status(QString("Изменение препятствия: действие отменено"));
                     this->action = WALKNESS;
                 }
