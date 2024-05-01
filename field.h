@@ -7,13 +7,13 @@
 #include <QFile>
 #include <QDebug>
 #include <QXmlStreamReader>
-#include <QtMath>
 #include "obstacle.h"
 #include "meshpoint.h"
 #include "prioqueue.h"
 
-class Field
-{
+typedef std::optional<QPoint> Waypoint;
+
+class Field {
     const bool debug = false;
     const bool drawObstacles = true;
     const bool drawPath = true;
@@ -36,56 +36,67 @@ class Field
     const QColor fillHard = QColor(74, 74, 74);
 
     const float pointGrabRadius = 6.;
-    bool dragging = false;
+    bool drawFlag = false;
+    bool dragFlag = false;
 
 public:
     Field(unsigned w, unsigned h);
+    ~Field();
+    void draw(QPainter* painter);
 
     int loadMap(QString path);
     int saveMap(QString path);
-    void resizeMap(unsigned w, unsigned h);
+    void resizeMap(unsigned width, unsigned height);
+    bool inMap(const QPoint& point);
+    double getFactorMap(const QPoint& point);
 
-    void setStart(QPoint p);
-    void setEnd(QPoint p);
+    void regenMesh();
+    MeshPoint* nearestMesh(const QPoint& point);
+    MeshPoint* getMesh(const QPoint& point);
 
-    bool addDraw(QPoint p);
-    void removeDraw();
-    QPolygon getDraw();
-    void finishDraw(float w);
-    void cancelDraw();
+    void setStart(QPoint point);
+    void setEnd(QPoint point);
+    Waypoint getStart();
+    Waypoint getEnd();
+
+    void startDraw();
+    bool doDraw(QPoint point);
+    void undoDraw();
+    void endDraw(double walk);
+    void stopDraw();
+    QPolygon* getDraw();
 
     void startDrag();
-    void startDrag(QPoint from);
-    bool toDrag(QPoint where);
-    void endDrag(bool flag = true);
+    void beginDrag(QPoint from);
+    bool moveDrag(QPoint where);
+    void endDrag();
+    void stopDrag();
 
-    float getFactor(QPoint point);
-    bool addPointAt(QPoint point);
-    bool removePolyAt(QPoint point);
-    bool removePointAt(QPoint point);
+    Obstacle* getObstacle(const QPoint& point);
+    bool removeObstacle(const QPoint& point);
+    bool removeObstacle(const Obstacle& obstacle);
+    void addPointObstacle(const QPoint& point);
+    void addPointObstacle(Obstacle& obst, const QPoint& point);
+    bool removePointObstacle(const QPoint& point);
+    bool removePointObstacle(Obstacle& obst, const QPoint& point);
 
     unsigned count();
 
-    void draw(QPainter* painter);
-
-    // Pathfinding Algorithm Functions
-    void makeMesh();
-    MeshPoint* pointOnMesh(QPoint point);
-
     float find();
-    void dijkstra_neighbor(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& came_from, QHash<QPoint, float>& cost_so_far, MeshPoint* current, MeshPoint* finish, QPoint offset);
-    float dijkstra(MeshPoint* start_point, MeshPoint* finish_point, QVector<MeshPoint>& shortestWayPoints);
+    void aStar_neighbor(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, float>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
+    float aStar(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way);
 
 protected:
     unsigned width, height;
-    std::optional<QPoint> start, end;
+
+    Waypoint start, end;
     QVector<Obstacle> obstacles;
     QVector<MeshPoint> way;
     QHash<QPoint, MeshPoint> mesh;
 
     QPolygon* dragPoly = 0;
     QPoint* dragPoint = 0;
-    QPolygon drawing;
+    QPolygon* drawPoly = 0;
 };
 
 #endif // FIELD_H

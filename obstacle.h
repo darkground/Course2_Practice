@@ -4,18 +4,18 @@
 #include <QPolygon>
 
 struct Obstacle {
-    float walkness;
     QPolygon poly;
+    double walkness;
 
-
-    Obstacle(QPolygon p) {
-        this->poly = p;
-        this->walkness = 0.;
-    }
+    Obstacle() = default;
 
     Obstacle(QPolygon p, float w) {
         this->poly = p;
         this->walkness = w;
+    }
+
+    bool operator== (const Obstacle& obst) const {
+        return poly == obst.poly;
     }
 };
 

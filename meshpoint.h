@@ -1,27 +1,24 @@
 #ifndef MESHPOINT_H
 #define MESHPOINT_H
 
-#include <QVector>
-#include <QPainter>
-#include <QString>
-#include <QFile>
-#include <QDebug>
+#include <QPoint>
+#include <QHash>
 
 struct MeshPoint {
     QPoint meshCoord;
     QPoint realCoord;
-    float walkness;
+    double walkness;
 
     MeshPoint() = default;
 
-    MeshPoint(QPoint m, QPoint p, float w) {
+    MeshPoint(QPoint m, QPoint p, double w) {
         this->meshCoord = m;
         this->realCoord = p;
         this->walkness = w;
     }
 
     bool operator == (const MeshPoint& point) const {
-        return this->meshCoord == point.meshCoord;
+        return meshCoord == point.meshCoord;
     }
 };
 
