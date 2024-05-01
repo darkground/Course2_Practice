@@ -12,6 +12,14 @@ Canvas::~Canvas() {
 }
 
 void Canvas::setAction(CanvasAction a) {
+    switch (this->action) {
+    case POLYGON_CREATE:
+        this->field->cancelDraw();
+        update();
+        break;
+    default:
+        break;
+    }
     this->action = a;
 }
 
