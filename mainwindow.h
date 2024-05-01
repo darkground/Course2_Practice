@@ -22,6 +22,7 @@ private slots:
     void setEnd();
     void createPoly();
     void deletePoly();
+    void editPoly();
 
     void coords(QPoint p);
     void objects(unsigned c);

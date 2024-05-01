@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnFinish, &QPushButton::clicked, this, &MainWindow::setEnd);
     connect(ui->btnAdd, &QPushButton::clicked, this, &MainWindow::createPoly);
     connect(ui->btnDelete, &QPushButton::clicked, this, &MainWindow::deletePoly);
+    connect(ui->btnEdit, &QPushButton::clicked, this, &MainWindow::editPoly);
     //connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::save);
 }
 
@@ -61,4 +62,9 @@ void MainWindow::createPoly() {
 void MainWindow::deletePoly() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_DELETE);
     ui->labelStatus->setText(QString("[ЛКМ] Удалить препятствие, [ПКМ] Отмена"));
+}
+
+void MainWindow::editPoly() {
+    ui->widgetGraph->setAction(CanvasAction::POLYGON_EDIT);
+    ui->labelStatus->setText(QString("[ЛКМ] Двигать точку, [Shift+ЛКМ] Добавить точку, [ПКМ] Удалить точку, [Shift+ПКМ] Отмена"));
 }
