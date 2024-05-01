@@ -24,6 +24,9 @@ class Field
     const QColor fillEasy = QColor(212, 212, 212);
     const QColor fillHard = QColor(74, 74, 74);
 
+    const float pointGrabRadius = 6.;
+    bool dragging = false;
+
 public:
     Field(unsigned w, unsigned h);
 
@@ -40,8 +43,15 @@ public:
     void finishDraw(float w);
     void cancelDraw();
 
+    void startDrag();
+    void startDrag(QPoint from);
+    bool toDrag(QPoint where);
+    void endDrag(bool flag = true);
+
     float getFactor(QPoint point);
-    bool removeAt(QPoint point);
+    bool addPointAt(QPoint point);
+    bool removePolyAt(QPoint point);
+    bool removePointAt(QPoint point);
 
     unsigned count();
 
@@ -50,8 +60,11 @@ public:
 protected:
     unsigned width, height;
     std::optional<QPoint> start, end;
-    QPolygon drawing;
     QVector<Obstacle> obstacles;
+
+    QPolygon* dragPoly = 0;
+    QPoint* dragPoint = 0;
+    QPolygon drawing;
 };
 
 #endif // FIELD_H
