@@ -116,10 +116,31 @@ void Field::draw(QPainter* painter) {
         painter->setPen(p);
         painter->setBrush(Field::fillEasy);
         painter->drawPolygon(this->drawing);
-        p.setColor(Field::drawLastPoint);
-        painter->setPen(p);
         painter->setBrush(QColor(0, 0, 0, 0));
-        painter->drawEllipse(this->drawing.last(), 6, 6);
+        for (QPoint& point : this->drawing) {
+            if (point == this->drawing.last()) {
+                p.setColor(Field::drawLastPoint);
+            } else {
+                p.setColor(Field::drawPoint);
+            }
+            painter->setPen(p);
+            painter->drawEllipse(point, 6, 6);
+        }
+    }
+
+    if (this->dragging) {
+        painter->setBrush(QColor(0, 0, 0, 0));
+        for (Obstacle& o : this->obstacles) {
+            for (QPoint& point : o.poly) {
+                if (&point == this->dragPoint) {
+                    p.setColor(Field::drawLastPoint);
+                } else {
+                    p.setColor(Field::drawPoint);
+                }
+                painter->setPen(p);
+                painter->drawEllipse(point, 6, 6);
+            }
+        }
     }
 
     p.setWidth(Field::pointOutlineWidth);
@@ -185,7 +206,56 @@ void Field::cancelDraw() {
     this->drawing.clear();
 }
 
-bool Field::removeAt(QPoint point) {
+void Field::startDrag() {
+    this->dragging = true;
+}
+
+void Field::startDrag(QPoint from) {
+    startDrag();
+    QPolygon* poly = 0;
+    QPoint* point = 0;
+    float closest = Field::pointGrabRadius;
+    for (Obstacle& obst : this->obstacles) {
+        for (QPoint& p : obst.poly) {
+            float dst = qSqrt(qPow(from.x() - p.x(), 2) + qPow(from.y() - p.y(), 2));
+            if (dst < closest && dst <= Field::pointGrabRadius) {
+                point = &p;
+                poly = &obst.poly;
+                closest = dst;
+            }
+        }
+    }
+    this->dragPoly = poly;
+    this->dragPoint = point;
+}
+
+bool Field::toDrag(QPoint where) {
+    if (this->dragPoint != 0) {
+        QPolygon it = *this->dragPoly;
+        QPoint old = *this->dragPoint;
+
+        if (where.x() < 0 || where.y() < 0 || where.x() >= (int)this->width || where.y() >= (int)this->height) return false;
+        *(this->dragPoint) = where;
+
+        for (Obstacle& o : this->obstacles) {
+            if (o.poly != it && o.poly.intersects(it)) {
+                *(this->dragPoint) = old;
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+void Field::endDrag(bool flag) {
+    this->dragPoly = 0;
+    this->dragPoint = 0;
+    if (flag) this->dragging = false;
+}
+
+
+bool Field::removePolyAt(QPoint point) {
     int idx = -1;
     for (int i = 0; i < this->obstacles.count(); i++) {
         if (this->obstacles[i].poly.containsPoint(point, Qt::FillRule::OddEvenFill)) {
@@ -195,6 +265,84 @@ bool Field::removeAt(QPoint point) {
     }
     if (idx == -1) return false;
     this->obstacles.removeAt(idx);
+    return true;
+}
+
+
+bool Field::removePointAt(QPoint point) {
+    QPolygon* poly = 0;
+    int idx = -1;
+    float closest = Field::pointGrabRadius;
+    for (Obstacle& obst : this->obstacles) {
+        for (int i = 0; i < obst.poly.size(); i++) {
+            QPoint& pt = obst.poly[i];
+            float dst = qSqrt(qPow(pt.x() - point.x(), 2) + qPow(pt.y() - point.y(), 2));
+            if (dst < closest && dst <= Field::pointGrabRadius) {
+                idx = i;
+                poly = &obst.poly;
+                closest = dst;
+            }
+        }
+    }
+    if (idx == -1) return false;
+    poly->removeAt(idx);
+    if (poly->size() < 3) {
+        for (int i = 0; i < this->obstacles.count(); i++) {
+            if (&this->obstacles[i].poly == poly) {
+                this->obstacles.removeAt(i);
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+QPoint nearestPoint(QLine& liner, QPoint& pointr){
+    double APx = pointr.x() - liner.x1();
+    double APy = pointr.y() - liner.y1();
+    double ABx = liner.x2() - liner.x1();
+    double ABy = liner.y2() - liner.y1();
+    double magAB2 = ABx*ABx + ABy*ABy;
+    double ABdotAP = ABx*APx + ABy*APy;
+    double t = ABdotAP / magAB2;
+
+    QPoint newPoint;
+
+    if (t < 0) {
+        newPoint = liner.p1();
+    }else if (t > 1){
+        newPoint = liner.p2();
+    }else{
+        newPoint.setX(liner.x1() + ABx*t);
+        newPoint.setY(liner.y1() + ABy*t);
+    }
+
+    return newPoint;
+}
+
+bool Field::addPointAt(QPoint point) {
+    QPolygon* poly = 0;
+    int idx = -1;
+    float closest = this->width * this->height;
+    for (Obstacle& obst : this->obstacles) {
+        if (obst.poly.containsPoint(point, Qt::OddEvenFill)) {
+            QVector<QPoint> points = obst.poly.toVector();
+            points.append(obst.poly.first());
+            for (int i = 1; i < points.size(); i++) {
+                QLine line(points[i-1], points[i]);
+                QPoint nearest = nearestPoint(line, point);
+                float dst = qSqrt(qPow(nearest.x() - point.x(), 2) + qPow(nearest.y() - point.y(), 2));
+                if (dst < closest) {
+                    idx = i;
+                    poly = &obst.poly;
+                    closest = dst;
+                }
+            }
+            break;
+        }
+    }
+    if (idx == -1) return false;
+    poly->insert(idx, point);
     return true;
 }
 

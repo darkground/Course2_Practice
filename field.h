@@ -22,6 +22,7 @@ class Field
     const int cellSize = 2;
 
     const QColor outline = QColor(26, 26, 26);
+    const QColor drawPoint = QColor(0, 4, 64);
     const QColor drawLastPoint = QColor(76, 76, 224);
     const QColor drawBorder = QColor(53, 51, 97);
     const QColor drawPathline = QColor(99, 255, 82);
@@ -33,6 +34,9 @@ class Field
     const QColor fillEnd = QColor(204, 103, 59);
     const QColor fillEasy = QColor(212, 212, 212);
     const QColor fillHard = QColor(74, 74, 74);
+
+    const float pointGrabRadius = 6.;
+    bool dragging = false;
 
 public:
     Field(unsigned w, unsigned h);
@@ -50,8 +54,15 @@ public:
     void finishDraw(float w);
     void cancelDraw();
 
+    void startDrag();
+    void startDrag(QPoint from);
+    bool toDrag(QPoint where);
+    void endDrag(bool flag = true);
+
     float getFactor(QPoint point);
-    bool removeAt(QPoint point);
+    bool addPointAt(QPoint point);
+    bool removePolyAt(QPoint point);
+    bool removePointAt(QPoint point);
 
     unsigned count();
 
@@ -68,11 +79,13 @@ public:
 protected:
     unsigned width, height;
     std::optional<QPoint> start, end;
-    QPolygon drawing;
     QVector<Obstacle> obstacles;
     QVector<MeshPoint> way;
-
     QHash<QPoint, MeshPoint> mesh;
+
+    QPolygon* dragPoly = 0;
+    QPoint* dragPoint = 0;
+    QPolygon drawing;
 };
 
 #endif // FIELD_H

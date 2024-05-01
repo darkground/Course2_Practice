@@ -15,7 +15,8 @@ enum CanvasAction {
     START = 1,
     END = 2,
     POLYGON_CREATE = 3,
-    POLYGON_DELETE = 4
+    POLYGON_DELETE = 4,
+    POLYGON_EDIT = 5
 };
 
 class Canvas : public QWidget
@@ -43,6 +44,8 @@ protected:
     void paintEvent(QPaintEvent*);
     bool event(QEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
+    void mousePressEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent* e);
 
 private:
     Ui::MainWindow* ui;
