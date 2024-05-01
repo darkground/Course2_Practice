@@ -45,6 +45,9 @@
        </property>
        <item>
         <widget class="QPushButton" name="btnAdd">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Начать создание препятствия.&lt;/span&gt; Нажатием мыши последовательно создаются вершины многоугольника, формирующие собой препятствие&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ЛКМ:&lt;/span&gt; Добавить точку по координатам мыши&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ПКМ:&lt;/span&gt; Подтвердить создание препятствия и перейти к установке непроходимости&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ЛКМ:&lt;/span&gt; Убрать последнюю добавленную точку&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ПКМ:&lt;/span&gt; Выйти из режима создания препятствия&lt;/p&gt;&lt;p&gt;Горячая клавиша:&lt;span style=&quot; font-weight:700;&quot;&gt; [ 2 ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
 padding: 3px;</string>
@@ -60,6 +63,9 @@ padding: 3px;</string>
        </item>
        <item>
         <widget class="QPushButton" name="btnDelete">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Начать удаление препятствия.&lt;/span&gt; Нажатием мыши удалить препятствие, которое находится под курсором мыши&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ЛКМ:&lt;/span&gt; Удалить препятствие под курсором&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ПКМ:&lt;/span&gt; Выйти из режима удаления препятствия&lt;/p&gt;&lt;p&gt;Горячая клавиша:&lt;span style=&quot; font-weight:700;&quot;&gt; [ 3 ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
 padding: 3px;</string>
@@ -75,6 +81,9 @@ padding: 3px;</string>
        </item>
        <item>
         <widget class="QPushButton" name="btnEdit">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Начать редактирование препятствия.&lt;/span&gt; При редактировании мышью можно редактировать препятствия на карте&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ЛКМ &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(зажать)&lt;/span&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;:&lt;/span&gt; Нажмите на точку и перетаскивайте для её перемещения по карте&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ПКМ:&lt;/span&gt; Удалить точку, находящуюся под курсором мыши&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ЛКМ:&lt;/span&gt; Добавить точку в препятствие под курсором мыши. Точка  будет добавлена к ближайшему лежащему ребру. Курсор мыши должен быть внутри препятствия&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ПКМ:&lt;/span&gt; Выйти из режима редактирования препятствия&lt;/p&gt;&lt;p&gt;Горячая клавиша:&lt;span style=&quot; font-weight:700;&quot;&gt; [ 4 ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
 padding: 3px;</string>
@@ -90,6 +99,9 @@ padding: 3px;</string>
        </item>
        <item>
         <widget class="QPushButton" name="btnStart">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Задать начальную точку маршрута.&lt;/span&gt; Нажатием мыши задаётся начальная точка маршрута&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ЛКМ:&lt;/span&gt; Установить точку под курсором мыши &lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ПКМ:&lt;/span&gt; Выйти из режима задания точки&lt;/p&gt;&lt;p&gt;Горячая клавиша:&lt;span style=&quot; font-weight:700;&quot;&gt; [ 5 ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
 padding: 3px;</string>
@@ -105,6 +117,9 @@ padding: 3px;</string>
        </item>
        <item>
         <widget class="QPushButton" name="btnFinish">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Задать конечную точку маршрута.&lt;/span&gt; Нажатием мыши задаётся конечная точка маршрута&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ЛКМ:&lt;/span&gt; Установить точку под курсором мыши &lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ПКМ:&lt;/span&gt; Выйти из режима задания точки&lt;/p&gt;&lt;p&gt;Горячая клавиша:&lt;span style=&quot; font-weight:700;&quot;&gt; [ 6 ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
 padding: 3px;</string>
@@ -140,6 +155,9 @@ padding: 3px;</string>
        </item>
        <item>
         <widget class="QPushButton" name="btnLoad">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Загрузить карту из XML-файла.&lt;/span&gt; Загрузить карту из XML-файла, который лежит вместе с программой&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
 padding: 3px;</string>
@@ -155,6 +173,9 @@ padding: 3px;</string>
        </item>
        <item>
         <widget class="QPushButton" name="btnSave">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Сохранить карту в XML-файл.&lt;/span&gt; Сохранить карту в XML-файл рядом с программой&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
 padding: 3px;</string>
