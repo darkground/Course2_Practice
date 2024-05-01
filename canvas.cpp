@@ -133,8 +133,9 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
             } else {
                 emit status(QString("Старт: установка отменена"));
             }
-            update();
+            this->field->find();
             this->action = WALKNESS;
+            update();
             break;
         }
         case END: {
@@ -145,6 +146,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
             } else {
                 emit status(QString("Финиш: действие отменено"));
             }
+            this->field->find();
             this->action = WALKNESS;
             update();
             break;
