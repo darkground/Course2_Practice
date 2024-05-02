@@ -86,8 +86,17 @@ void Field::draw(QPainter* painter) {
     }
 }
 
-// Map
+// Map -- Функции карты
 
+//!
+//! Загрузить карту из XML-файла
+//!
+//! \param path Путь до XML-файла
+//! \return 0 в случае успеха
+//! \return -1 если файл не найден
+//! \return -2 если файл имеет неверную структуру
+//! \return -3 если файл имеет неверные значения
+//!
 int Field::loadMap(QString path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return -1;
@@ -132,6 +141,12 @@ int Field::saveMap(QString path) {
     return 0;
 }
 
+//!
+//! Поменять размеры карты
+//!
+//! \param width Ширина
+//! \param height Высота
+//!
 void Field::resizeMap(unsigned width, unsigned height) {
     obstacles.clear();
     this->width = width;
@@ -140,10 +155,22 @@ void Field::resizeMap(unsigned width, unsigned height) {
     regenMesh();
 }
 
+//!
+//! Проверка принадлежности точки полю
+//!
+//! \param point Точка
+//! \return Принадлежность
+//!
 bool Field::inMap(const QPoint& point) {
     return point.x() >= 0 && point.y() >= 0 && point.x() < (int)width && point.y() < (int)height;
 }
 
+//!
+//! Получение непроходимости в точке поля
+//!
+//! \param point Точка
+//! \return Фактор непроходимости в этой точке поля
+//!
 double Field::getFactorMap(const QPoint& point) {
     for (Obstacle& obst : obstacles) {
         if (obst.poly.containsPoint(point, Qt::FillRule::OddEvenFill)) {
@@ -153,8 +180,13 @@ double Field::getFactorMap(const QPoint& point) {
     return 0.;
 }
 
-// Mesh
+// Mesh -- Сетка
 
+//!
+//! \brief Генерация сетки.
+//! Генерирует сетку, ширина ячейки которой равна `Field::cellSize`.
+//! Необходимый этап перед запуском нахождения кратчайшего пути
+//!
 void Field::regenMesh() {
     mesh.clear();
 
@@ -172,6 +204,13 @@ void Field::regenMesh() {
     qInfo() << "Field::mesh" << "Generated size" << mesh.size();
 }
 
+//!
+//! Ближайшая точка на сетке.
+//! Получить ближайшую точку на сетке используя произвольную точку
+//!
+//! \param point Точка
+//! \return Указатель на ближайшую точку или nullptr если не найдено
+//!
 MeshPoint* Field::nearestMesh(const QPoint& point) {
     MeshPoint* shortestMesh = 0;
     float shortestDist = width * height;
@@ -186,6 +225,13 @@ MeshPoint* Field::nearestMesh(const QPoint& point) {
     return shortestMesh;
 }
 
+//!
+//! Получить точку сетки.
+//! Получить точку на сетке используя произвольную точку
+//!
+//! \param point Точка
+//! \return Указатель на точку сетки или nullptr если не найдено
+//!
 MeshPoint* Field::getMesh(const QPoint& point) {
     if (mesh.contains(point)) return &mesh[point];
     return 0;
@@ -193,32 +239,65 @@ MeshPoint* Field::getMesh(const QPoint& point) {
 
 // Points
 
+//!
+//! Установить старт
+//!
+//! \param point Точка старта
+//!
 void Field::setStart(QPoint point) {
     qInfo() << "Field::start" << point;
     start.emplace(point);
 }
 
+//!
+//! Установить финиш
+//!
+//! \param point Точка финиша
+//!
 void Field::setEnd(QPoint point) {
     qInfo() << "Field::end" << point;
     end.emplace(point);
 }
 
+//!
+//! Получить точку старта
+//!
+//! \return Точка старта или nullopt если она не задана
+//!
 Waypoint Field::getStart() {
     return start;
 }
 
+//!
+//! Получить точку финиша
+//!
+//! \return Точка финиша или nullopt если она не задана
+//!
 Waypoint Field::getEnd() {
     return end;
 }
 
-// Polygon Drawing
+// Polygon Drawing -- Функции рисования полигонов
 
+//!
+//! \brief Начать рисование полигона
+//! Подготовить поле для рисования полигона
+//!
 void Field::startDraw() {
     qInfo() << "Field::polyDraw" << "Start";
     drawFlag = true;
     drawPoly = new QPolygon();
 }
 
+//!
+//! Добавить точку в рисуемый полигон
+//!
+//! \param p Точка для добавления в полигон
+//! \return Успех добавления
+//!
+//! Функция должна быть вызвана после startDraw() и до stopDraw(),
+//! иначе эффекта не будет.
+//!
 bool Field::doDraw(QPoint p) {
     if (!drawFlag) return false;
     if (getFactorMap(p) != 0.) return false;
@@ -232,6 +311,13 @@ bool Field::doDraw(QPoint p) {
     return true;
 }
 
+//!
+//! \brief Убрать последнюю нарисованную точку
+//!
+//! Ничего не произойдёт если рисуемый полигон не имеет точек.
+//! Функция должна быть вызвана после startDraw() и до stopDraw(),
+//! иначе эффекта не будет.
+//!
 void Field::undoDraw() {
     if (!drawFlag) return;
     if (!drawPoly->empty()) {
@@ -240,10 +326,23 @@ void Field::undoDraw() {
     }
 }
 
+//!
+//! Получить рисуемый полигон
+//! \return Рисуемый полигон или nullptr если рисование не начато
+//!
 QPolygon* Field::getDraw() {
     return drawPoly;
 }
 
+//!
+//! Подтвердить рисование полигона
+//! Подтвердить рисование полигона, создав препятствие с данной непроходимостью.
+//! Функция должна быть вызвана после startDraw() и до stopDraw(),
+//! иначе эффекта не будет.
+//! Эта функция автоматически останавливает рисовку, вызывая stopDraw().
+//!
+//! \param w Непроходимость полигона
+//!
 void Field::endDraw(double w) {
     if (!drawFlag) return;
     qInfo() << "Field::polyDraw" << "End, W =" << w;
@@ -252,6 +351,10 @@ void Field::endDraw(double w) {
     stopDraw();
 }
 
+//!
+//! \brief Выйти из режима рисовки
+//! Остановить рисовку и очистить все ресурсы.
+//!
 void Field::stopDraw() {
     qInfo() << "Field::polyDraw" << "Stop";
     drawFlag = false;
@@ -259,13 +362,27 @@ void Field::stopDraw() {
     drawPoly = 0;
 }
 
-// Polygon Editing
+// Polygon Editing -- Редактирование полигонов
 
+//!
+//! \brief Начать режим перемещения точки полигона
+//! Подготовить поле к перемещению точки полигона пользователем.
+//!
 void Field::startDrag() {
     qInfo() << "Field::polyDrag" << "Start";
     dragFlag = true;
 }
 
+//!
+//! Начать захват точки полигона
+//! Начать захват точки полигона от точки, данной пользователем.
+//! Если нашлись точки в радиусе Field::pointGrabRadius от данной точки,
+//! то для захвата выбирается ближайшая из них.
+//! Функция должна быть вызвана после startDrag() и до stopDrag(),
+//! иначе эффекта не будет.
+//!
+//! \param from Точка поля
+//!
 void Field::beginDrag(QPoint from) {
     dragPoly = 0;
     dragPoint = 0;
@@ -284,6 +401,17 @@ void Field::beginDrag(QPoint from) {
     else qInfo() << "Field::polyDrag" << "Attach" << "NULL";
 }
 
+//!
+//! Передвинуть захваченную точку
+//! Эта функция передвигает раннее захваченную точку в координаты, данные пользователем.
+//! Если точка не захвачена, функция вернёт false.
+//! Если точка находится вне карты, функция вернёт false.
+//! Функция должна быть вызвана после startDrag() и до stopDrag(),
+//! иначе эффекта не будет.
+//!
+//! \param where Куда передвинуть
+//! \return Успех или нет
+//!
 bool Field::moveDrag(QPoint where) {
     if (dragPoint == 0) return false;
     if (!inMap(where)) return false;
@@ -301,18 +429,35 @@ bool Field::moveDrag(QPoint where) {
     return true;
 }
 
+//!
+//! \brief Снять захват точки
+//!
 void Field::endDrag() {
     dragPoly = 0;
     dragPoint = 0;
     qInfo() << "Field::polyDrag" << "End";
 }
 
+//!
+//! \brief Выйти из режима перемещения точки
+//! Остановить перемещение и очистить ресурсы.
+//! Данная функция автоматически вызывает регенерацию сетки, т.к. произошли изменения в структуре препятствий
+//!
 void Field::stopDrag() {
     dragFlag = false;
     regenMesh();
     qInfo() << "Field::polyDrag" << "Stop";
 }
 
+//!
+//! Получить препятствие по точке
+//! Возвращает препятствие под точкой.
+//! Так как препятствия не могут пересекаться, то на карте каждая точка может либо лежать в
+//! только одном препятствии, либо не лежать вообще
+//!
+//! \param point Точка
+//! \return Препятствие или nullptr если не найдено
+//!
 Obstacle* Field::getObstacle(const QPoint& point) {
     for (Obstacle& obst : obstacles) {
         if (obst.poly.containsPoint(point, Qt::FillRule::OddEvenFill)) {
@@ -322,12 +467,25 @@ Obstacle* Field::getObstacle(const QPoint& point) {
     return 0;
 }
 
+//!
+//! Удалить препятствие по точке
+//!
+//! \param point Точка
+//! \return Успех или нет
+//!
 bool Field::removeObstacle(const QPoint& point) {
     Obstacle* obst = getObstacle(point);
     if (obst == 0) return false;
     return removeObstacle(*obst);
 }
 
+//!
+//! Удалить препятствие
+//! Удаляемое препятствие должно присутствовать в списке препятствий поля
+//!
+//! \param obst Препятствие.
+//! \return Успех или нет
+//!
 bool Field::removeObstacle(const Obstacle& obst) {
     qInfo() << "Field::remObst" << obst.walkness;
     if (obstacles.removeOne(obst)) {
@@ -337,12 +495,27 @@ bool Field::removeObstacle(const Obstacle& obst) {
     return false;
 }
 
+
+//!
+//! Добавить точку в препятствие
+//! Добавляемая точка должна лежать в пределах полигона препятствия
+//!
+//! \param point Точка
+//!
 void Field::addPointObstacle(const QPoint& point) {
     Obstacle* obst = getObstacle(point);
     if (obst == 0) return;
     addPointObstacle(*obst, point);
 }
 
+//!
+//! Добавить точку в препятствие
+//! Добавляет точку в препятствие, разделяя ближайшее к этой точке ребро на две части,
+//! соединённых данной точкой
+//!
+//! \param obst Препятствие
+//! \param point Точка
+//!
 void Field::addPointObstacle(Obstacle& obst, const QPoint& point) {
     QVector<QPoint> points = obst.poly.toVector();
     points.append(obst.poly.first());
@@ -362,12 +535,27 @@ void Field::addPointObstacle(Obstacle& obst, const QPoint& point) {
     qInfo() << "Field::addPoint" << point;
 }
 
+//!
+//! Удалить точку из препятствия
+//! Удаляемая точка должна лежать в пределах полигона препятствия
+//!
+//! \param point Точка
+//! \return Успех или нет
+//!
 bool Field::removePointObstacle(const QPoint& point) {
     Obstacle* obst = getObstacle(point);
     if (obst == 0) return false;
     return removePointObstacle(*obst, point);
 }
 
+//!
+//! Удалить точку из препятствия
+//! Удаляет точку, которая лежит ближе всего к точке, данной пользователем
+//!
+//! \param obst Препятствие
+//! \param point Точка
+//! \return Успех или нет
+//!
 bool Field::removePointObstacle(Obstacle& obst, const QPoint& point) {
     int idx = -1;
     float closest = width * height;
@@ -389,11 +577,20 @@ bool Field::removePointObstacle(Obstacle& obst, const QPoint& point) {
 
 // Pathfinding
 
+//!
+//! Найти путь
+//! Ищет кратчайший путь по сгенерированной раннее сетке с помощью алгоритма A*.
+//! Если путь найден, то он сохранён в way.
+//!
+//! \return >0 если путь найден
+//! \return ==0 если не получилось проложить путь от старта до финиша
+//! \return -1 если старт/финиш не задан
+//!
 float Field::findPath() {
     if (!start.has_value() || !end.has_value()) return -1;
     MeshPoint* mstart = nearestMesh(*start);
     MeshPoint* mend = nearestMesh(*end);
-    if (mstart == 0 || mend == 0) return false;
+    if (mstart == 0 || mend == 0) return -1;
 
     way.clear();
     float shortest = aStarPath(mstart, mend, way);
@@ -402,6 +599,18 @@ float Field::findPath() {
     return shortest;
 }
 
+//!
+//! Под-функция A* для обработки соседних клеток в сетке
+//! Если текущая позиция + смещение выходит за рамки карты, то функция завершается.
+//! Если соседняя позиция имеет непроходимость 1.0, то препятствие считается стеной и его необходимо обойти
+//!
+//! \param queue Приоритетная очередь
+//! \param origins Hash-карта показывающая, откуда проложен путь
+//! \param costs Hash-карта показывающая, какая минимальная стоимость нужна для достижения этой клетки в сетке
+//! \param current Указатель на текущую позицию в сетке
+//! \param finish Цель (финиш)
+//! \param offset Смещение по координатам
+//!
 void Field::aStarN(
     PriorityQueue<MeshPoint*, float>& queue,
     QHash<QPoint, QPoint>& origins,
@@ -422,7 +631,15 @@ void Field::aStarN(
     }
 }
 
-// Алгоритм поиска пути A*
+//!
+//! Алгоритм поиска пути A*
+//!
+//! \param start Начальная точка
+//! \param finish Конечная точка
+//! \param way Вектор для сохранения пути
+//! \return Длина пути, если путь найден
+//! \return 0, если путь не найден
+//!
 float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way) {
     way.clear();
     PriorityQueue<MeshPoint*, float> queue;
@@ -456,10 +673,21 @@ float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& 
     return cost;
 }
 
+//!
+//! Получить количество препятствий на карте
+//!
+//! \return Количество препятствий
+//!
 unsigned Field::polyCount() {
     return obstacles.length();
 }
 
+//!
+//! Сглаживание пути
+//! Данная функция изменяет массив, данный на вход.
+//!
+//! \param Ссылка на путь, который необходимо сгладить.
+//!
 void Field::smoothifyPath(QVector<MeshPoint>& vec) {
     QVector <QLine> lines;
     QVector <MeshPoint> finalVec;
