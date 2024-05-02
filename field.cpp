@@ -38,11 +38,19 @@ void Field::draw(QPainter* painter) {
     }
 
     if (drawPath) {
-        p.setColor(Field::drawPathline);
+        p.setColor(Qt::red);
         painter->setPen(p);
         for (int i = 1; i * Field::pathSmoothing < way.length(); i++) {
             MeshPoint& prev = way[(i-1) * Field::pathSmoothing];
             MeshPoint& next = way[i * Field::pathSmoothing];
+            painter->drawLine(prev.realCoord, next.realCoord);
+        }
+        p.setColor(Field::drawPathline);
+        painter->setPen(p);
+        QVector<MeshPoint> spath = smoothPath(way);
+        for (int i = 1; i < spath.length(); i++) {
+            MeshPoint& prev = spath[i-1];
+            MeshPoint& next = spath[i];
             painter->drawLine(prev.realCoord, next.realCoord);
         }
     }
@@ -594,7 +602,6 @@ float Field::findPath() {
 
     way.clear();
     float shortest = aStarPath(mstart, mend, way);
-    smoothifyPath(way);
     qInfo() << "Field::find" << shortest << "/" << way.length();
     return shortest;
 }
@@ -688,7 +695,8 @@ unsigned Field::polyCount() {
 //!
 //! \param Ссылка на путь, который необходимо сгладить.
 //!
-void Field::smoothifyPath(QVector<MeshPoint>& vec) {
+QVector<MeshPoint> Field::smoothPath(const QVector<MeshPoint>& vec) {
+    if (vec.length() == 0) return QVector<MeshPoint>();
     QVector <QLine> lines;
     QVector <MeshPoint> finalVec;
     int curr = 0;
@@ -714,5 +722,5 @@ void Field::smoothifyPath(QVector<MeshPoint>& vec) {
     lines.append(line);
     finalVec.append(vec[curr]);
     finalVec.append(vec[vec.length() - 1]);
-    vec = finalVec;
+    return finalVec;
 }

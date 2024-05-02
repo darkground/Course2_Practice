@@ -83,7 +83,7 @@ public:
     float findPath();
     void aStarN(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, float>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
     float aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way);
-    void smoothifyPath(QVector<MeshPoint>& vec);
+    QVector<MeshPoint> smoothPath(const QVector<MeshPoint>& vec);
 
     unsigned polyCount();
 
