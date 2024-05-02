@@ -389,19 +389,19 @@ bool Field::removePointObstacle(Obstacle& obst, const QPoint& point) {
 
 // Pathfinding
 
-float Field::find() {
+float Field::findPath() {
     if (!start.has_value() || !end.has_value()) return -1;
     MeshPoint* mstart = nearestMesh(*start);
     MeshPoint* mend = nearestMesh(*end);
     if (mstart == 0 || mend == 0) return false;
 
     way.clear();
-    float shortest = aStar(mstart, mend, way);
+    float shortest = aStarPath(mstart, mend, way);
     qInfo() << "Field::find" << shortest << "/" << way.length();
     return shortest;
 }
 
-void Field::aStar_neighbor(
+void Field::aStarN(
     PriorityQueue<MeshPoint*, float>& queue,
     QHash<QPoint, QPoint>& origins,
     QHash<QPoint, float>& costs,
@@ -422,7 +422,7 @@ void Field::aStar_neighbor(
 }
 
 // Алгоритм поиска пути A*
-float Field::aStar(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way) {
+float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way) {
     way.clear();
     PriorityQueue<MeshPoint*, float> queue;
     queue.put(start, 1.);
@@ -435,11 +435,11 @@ float Field::aStar(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way)
     while (!queue.empty()) {
         MeshPoint* current = queue.get();
         if (current == finish) break;
-
-        aStar_neighbor(queue, origins, costs, current, finish, QPoint(1, 0));
-        aStar_neighbor(queue, origins, costs, current, finish, QPoint(0, 1));
-        aStar_neighbor(queue, origins, costs, current, finish, QPoint(-1, 0));
-        aStar_neighbor(queue, origins, costs, current, finish, QPoint(0, -1));
+        
+        aStarN(queue, origins, costs, current, finish, QPoint(1, 0));
+        aStarN(queue, origins, costs, current, finish, QPoint(0, 1));
+        aStarN(queue, origins, costs, current, finish, QPoint(-1, 0));
+        aStarN(queue, origins, costs, current, finish, QPoint(0, -1));
     }
 
     QPoint current = finish->meshCoord;
@@ -455,6 +455,11 @@ float Field::aStar(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way)
     return cost;
 }
 
-unsigned Field::count() {
+unsigned Field::polyCount() {
     return obstacles.length();
+}
+
+void Field::smoothifyPath(QVector<MeshPoint>& vec) {
+
+    // ...
 }

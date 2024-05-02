@@ -131,7 +131,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
             } else {
                 emit status(QString("Старт: установка отменена"));
             }
-            this->field->find();
+            this->field->findPath();
             this->action = WALKNESS;
             update();
             break;
@@ -144,7 +144,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
             } else {
                 emit status(QString("Финиш: установка отменена"));
             }
-            this->field->find();
+            this->field->findPath();
             this->action = WALKNESS;
             update();
             break;
@@ -169,9 +169,9 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
                     double w = QInputDialog::getDouble(this, "Непроходимость", "Введите непроходиость:", 0.5, 0., 1., 2, &ok, Qt::WindowFlags(), 0.01);
                     if (ok) {
                         this->field->endDraw(w);
-                        emit objects(this->field->count());
+                        emit objects(this->field->polyCount());
                         emit status(QString("Создание препятствия: завершено"));
-                        this->field->find();
+                        this->field->findPath();
                         this->action = WALKNESS;
                     }
                 } else {
@@ -186,9 +186,9 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
         case POLYGON_DELETE: {
             if (event->button() == Qt::LeftButton) {
                 if (this->field->removeObstacle(event->pos())) {
-                    emit objects(this->field->count());
+                    emit objects(this->field->polyCount());
                     emit status(QString("Удаление препятствия: удалено"));
-                    this->field->find();
+                    this->field->findPath();
                     this->action = WALKNESS;
                 } else {
                     emit status(QString("Удаление препятствия: препятствие не найдено"));
@@ -207,7 +207,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
                     bool r = this->field->removePointObstacle(event->pos());
                     if (r) {
-                        emit objects(this->field->count());
+                        emit objects(this->field->polyCount());
                         emit status(QString("Изменение препятствия: точка удалена"));
                     } else {
                         emit status(QString("Изменение препятствия: точка не найдена"));
@@ -216,7 +216,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
                     this->field->endDrag();
                     this->field->stopDrag();
                     emit status(QString("Изменение препятствия: завершено"));
-                    this->field->find();
+                    this->field->findPath();
                     this->action = WALKNESS;
                 }
             }
@@ -245,7 +245,7 @@ void Canvas::load(QString path)
             break;
         default:
             emit status(QString("Загрузка карты: XML-файл успешно загружен"));
-            emit objects(this->field->count());
+            emit objects(this->field->polyCount());
             update();
             break;
     }

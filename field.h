@@ -80,11 +80,12 @@ public:
     bool removePointObstacle(const QPoint& point);
     bool removePointObstacle(Obstacle& obst, const QPoint& point);
 
-    unsigned count();
+    float findPath();
+    void aStarN(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, float>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
+    float aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way);
+    void smoothifyPath(QVector<MeshPoint>& vec);
 
-    float find();
-    void aStar_neighbor(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, float>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
-    float aStar(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way);
+    unsigned polyCount();
 
 protected:
     unsigned width, height;
