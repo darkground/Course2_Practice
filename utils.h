@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QLine>
+#include <QPolygon>
 #include <QtMath>
 
 QColor mix(const QColor& c1, const QColor& c2, double factor) {
@@ -43,6 +44,12 @@ QPoint nearestPointOnLine(const QLine& l, const QPoint& p){
     }
 
     return newPoint;
+}
+
+bool lineIntersectsPolygon(const QLine& line, const QPolygon& polygon) {
+    QPolygon t;
+    t << line.p1() << line.p2();
+    return polygon.intersects(t);
 }
 
 #endif // UTILS_H
