@@ -18,7 +18,7 @@ class Field {
     const bool drawObstacles = true;
     const bool drawPath = true;
 
-    const int pathSmoothing = 8;
+    const int pathSmoothing = 1;
     const int cellSize = 2;
 
     const QColor outline = QColor(26, 26, 26);

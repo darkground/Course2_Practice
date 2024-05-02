@@ -397,6 +397,7 @@ float Field::findPath() {
 
     way.clear();
     float shortest = aStarPath(mstart, mend, way);
+    smoothifyPath(way);
     qInfo() << "Field::find" << shortest << "/" << way.length();
     return shortest;
 }
@@ -460,6 +461,30 @@ unsigned Field::polyCount() {
 }
 
 void Field::smoothifyPath(QVector<MeshPoint>& vec) {
+    QVector <QLine> lines;
+    QVector <MeshPoint> finalVec;
+    int curr = 0;
+    // QVector <MeshPoint>::Iterator iter = vec.begin();
 
-    // ...
+    for(int i = 1; i < vec.length(); ++i) {
+        QLine line(vec[curr].realCoord, vec[i].realCoord);
+        // lines.append(line);
+        for(int j = 0; j < obstacles.length(); ++j) {
+            bool test = lineIntersectsPolygon(line, obstacles[j].poly);
+            qDebug() << line << obstacles[j].poly << test;
+            if(test) {
+                line.setP2(vec[i-1].realCoord);
+                finalVec.append(vec[curr]);
+                finalVec.append(vec[i-1]);
+                curr = i-1;
+                lines.append(line);
+                break;
+            }
+        }
+    }
+    QLine line(vec[curr].realCoord, vec[vec.length() - 1].realCoord);
+    lines.append(line);
+    finalVec.append(vec[curr]);
+    finalVec.append(vec[vec.length() - 1]);
+    vec = finalVec;
 }
