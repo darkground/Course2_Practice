@@ -2,6 +2,7 @@
 #include "utils.h"
 
 Field::Field(unsigned w, unsigned h) {
+    qDebug() << "Field::init" << w << h;
     this->width = w;
     this->height = h;
     regenMesh();
@@ -14,8 +15,8 @@ Field::~Field() {
 void Field::draw(QPainter* painter) {
     QPen p;
 
-    if (debug) {
-        p.setColor(QColor(0, 0, 0, 50));
+    if (dGrid) {
+        p.setColor(dGridOutline ? QColor(0, 0, 0, 50) : QColor(0, 0, 0, 0));
         painter->setPen(p);
         for (auto it = mesh.keyValueBegin(); it != mesh.keyValueEnd(); ++it) {
             QPoint startPoint = it->second.realCoord;
@@ -29,7 +30,7 @@ void Field::draw(QPainter* painter) {
     p.setColor(Field::outline);
     painter->setPen(p);
 
-    if (drawObstacles) {
+    if (!dNoObstacles) {
         for (Obstacle& obst : obstacles) {
             QColor polyColor = mix(Field::fillEasy, Field::fillHard, obst.walkness);
             painter->setBrush(polyColor);
@@ -37,20 +38,12 @@ void Field::draw(QPainter* painter) {
         }
     }
 
-    if (drawPath) {
+    if (!dNoPath) {
         p.setColor(Qt::red);
         painter->setPen(p);
-        for (int i = 1; i * Field::pathSmoothing < way.length(); i++) {
-            MeshPoint& prev = way[(i-1) * Field::pathSmoothing];
-            MeshPoint& next = way[i * Field::pathSmoothing];
-            painter->drawLine(prev.realCoord, next.realCoord);
-        }
-        p.setColor(Field::drawPathline);
-        painter->setPen(p);
-        QVector<MeshPoint> spath = smoothPath(way);
-        for (int i = 1; i < spath.length(); i++) {
-            MeshPoint& prev = spath[i-1];
-            MeshPoint& next = spath[i];
+        for (int i = 1; i < way.length(); i++) {
+            MeshPoint& prev = way[i-1];
+            MeshPoint& next = way[i];
             painter->drawLine(prev.realCoord, next.realCoord);
         }
     }
@@ -603,6 +596,11 @@ float Field::findPath() {
     way.clear();
     float shortest = aStarPath(mstart, mend, way);
     qInfo() << "Field::find" << shortest << "/" << way.length();
+
+    way = smoothv1Path(way);
+    std::reverse(way.begin(), way.end());
+    way = splicePath(way);
+    way = smoothv1Path(way);
     return shortest;
 }
 
@@ -630,7 +628,7 @@ void Field::aStarN(
     if (!mesh.contains(off)) return;
     MeshPoint* neighbor = &mesh[off];
     if (neighbor->walkness >= 1.) return;
-    float new_cost = costs[current->meshCoord] + 1 + neighbor->walkness;
+    float new_cost = costs[current->meshCoord] + vectorLength(offset) + neighbor->walkness;
     if (!costs.contains(neighbor->meshCoord) || new_cost < costs[neighbor->meshCoord]) {
         costs[neighbor->meshCoord] = new_cost;
         origins[neighbor->meshCoord] = current->meshCoord;
@@ -665,6 +663,11 @@ float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& 
         aStarN(queue, origins, costs, current, finish, QPoint(0, 1));
         aStarN(queue, origins, costs, current, finish, QPoint(-1, 0));
         aStarN(queue, origins, costs, current, finish, QPoint(0, -1));
+        // Diagonals
+        aStarN(queue, origins, costs, current, finish, QPoint(1, 1));
+        aStarN(queue, origins, costs, current, finish, QPoint(1, -1));
+        aStarN(queue, origins, costs, current, finish, QPoint(-1, 1));
+        aStarN(queue, origins, costs, current, finish, QPoint(-1, -1));
     }
 
     QPoint current = finish->meshCoord;
@@ -691,36 +694,98 @@ unsigned Field::polyCount() {
 
 //!
 //! Сглаживание пути
-//! Данная функция изменяет массив, данный на вход.
+//! Сглаживание пути быстрым методом линейного прохода
 //!
-//! \param Ссылка на путь, который необходимо сгладить.
+//! \param Путь, который необходимо сгладить.
 //!
-QVector<MeshPoint> Field::smoothPath(const QVector<MeshPoint>& vec) {
-    if (vec.length() == 0) return QVector<MeshPoint>();
-    QVector <QLine> lines;
+QVector<MeshPoint> Field::smoothv1Path(const QVector<MeshPoint>& vec) {
+    if (vec.length() < 1) return vec;
     QVector <MeshPoint> finalVec;
     int curr = 0;
-    // QVector <MeshPoint>::Iterator iter = vec.begin();
 
-    for(int i = 1; i < vec.length(); ++i) {
+    for (int i = 1; i < vec.length(); ++i) {
         QLine line(vec[curr].realCoord, vec[i].realCoord);
-        // lines.append(line);
-        for(int j = 0; j < obstacles.length(); ++j) {
-            bool test = lineIntersectsPolygon(line, obstacles[j].poly);
-            qDebug() << line << obstacles[j].poly << test;
-            if(test) {
+        for (int j = 0; j < obstacles.length(); ++j) {
+            if (lineIntersectsPolygon(line, obstacles[j].poly)) {
                 line.setP2(vec[i-1].realCoord);
                 finalVec.append(vec[curr]);
                 finalVec.append(vec[i-1]);
                 curr = i-1;
-                lines.append(line);
                 break;
             }
         }
     }
-    QLine line(vec[curr].realCoord, vec[vec.length() - 1].realCoord);
-    lines.append(line);
     finalVec.append(vec[curr]);
     finalVec.append(vec[vec.length() - 1]);
     return finalVec;
+}
+
+//!
+//! Сглаживание пути
+//! Сглаживание пути итеративным подходом упрощения
+//!
+//! \param Путь, который необходимо сгладить.
+//!
+QVector<MeshPoint> Field::smoothv2Path(const QVector<MeshPoint>& vec, int maxSteps) {
+    if (vec.length() < 2) return vec;
+    QVector <MeshPoint> reduced(vec);
+    QVector <MeshPoint> ignorance;
+
+    for (int it = 0; it < maxSteps && reduced.length() > 2; it++) {
+        QVector<MeshPoint> next;
+        next.append(reduced[0]);
+        int i = 1;
+        while (i < reduced.length()-1) {
+            if (ignorance.contains(reduced[i])) {
+                next.append(reduced[i]);
+                i += 1;
+                continue;
+            }
+            QLine line(reduced[i-1].realCoord, reduced[i+1].realCoord);
+            bool inter = false;
+            for (Obstacle& obst : obstacles) {
+                if (lineIntersectsPolygon(line, obst.poly)) {
+                    inter = true;
+                    break;
+                }
+            }
+
+            if (inter) {
+                next.append(reduced[i]);
+                ignorance.append(reduced[i]);
+                i += 1;
+            } else {
+                next.append(reduced[i+1]);
+                i += 2;
+            }
+        }
+        next.append(reduced[reduced.length()-1]);
+        reduced = next;
+    }
+
+    return reduced;
+}
+
+//!
+//! Разделение пути
+//! Разделить линии путя на точки с заданным интервалом
+//!
+//! \param Путь, который необходимо сгладить.
+//!
+QVector<MeshPoint> Field::splicePath(const QVector<MeshPoint>& vec, int interval) {
+    QVector<MeshPoint> result;
+    for (int i = 1; i < vec.length(); i++) {
+        QLine formed(vec[i-1].realCoord, vec[i].realCoord);
+        double dist = euclideanDistance(formed.p1(), formed.p2());
+        double dx = formed.dx() / dist;
+        double dy = formed.dy() / dist;
+        for (int j = 0; j < dist; j += interval) {
+            QPoint init = formed.p1();
+            QPoint rp = QPoint(init.x() + dx * j, init.y() + dy * j);
+            MeshPoint mp = MeshPoint(QPoint(-1, -1), rp, getFactorMap(rp));
+            result.append(mp);
+        }
+        result.append(vec[i]);
+    }
+    return result;
 }

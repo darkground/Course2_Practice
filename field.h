@@ -14,13 +14,6 @@
 typedef std::optional<QPoint> Waypoint;
 
 class Field {
-    const bool debug = false;
-    const bool drawObstacles = true;
-    const bool drawPath = true;
-
-    const int pathSmoothing = 1;
-    const int cellSize = 2;
-
     const QColor outline = QColor(26, 26, 26);
     const QColor drawPoint = QColor(0, 4, 64);
     const QColor drawLastPoint = QColor(76, 76, 224);
@@ -40,6 +33,12 @@ class Field {
     bool dragFlag = false;
 
 public:
+    bool dGrid = false;
+    bool dGridOutline = false;
+    bool dNoObstacles = false;
+    bool dNoPath = false;
+    int cellSize = 2;
+
     Field(unsigned w, unsigned h);
     ~Field();
     void draw(QPainter* painter);
@@ -83,10 +82,11 @@ public:
     float findPath();
     void aStarN(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, float>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
     float aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way);
-    QVector<MeshPoint> smoothPath(const QVector<MeshPoint>& vec);
+    QVector<MeshPoint> smoothv1Path(const QVector<MeshPoint>& vec);
+    QVector<MeshPoint> smoothv2Path(const QVector<MeshPoint>& vec, int maxSteps = 16);
+    QVector<MeshPoint> splicePath(const QVector<MeshPoint>& vec, int interval = 2);
 
     unsigned polyCount();
-
 protected:
     unsigned width, height;
 
