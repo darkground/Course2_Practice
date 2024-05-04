@@ -11,12 +11,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->widgetGraph, &Canvas::objects, this, &MainWindow::objects);
     connect(ui->widgetGraph, &Canvas::status, this, &MainWindow::status);
 
-    connect(ui->btnLoad, &QPushButton::clicked, this, &MainWindow::load);
     connect(ui->btnStart, &QPushButton::clicked, this, &MainWindow::setStart);
     connect(ui->btnFinish, &QPushButton::clicked, this, &MainWindow::setEnd);
     connect(ui->btnAdd, &QPushButton::clicked, this, &MainWindow::createPoly);
     connect(ui->btnDelete, &QPushButton::clicked, this, &MainWindow::deletePoly);
     connect(ui->btnEdit, &QPushButton::clicked, this, &MainWindow::editPoly);
+    
+    connect(ui->btnLoad, &QPushButton::clicked, this, &MainWindow::load);
     //connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::save);
 }
 
@@ -46,12 +47,12 @@ void MainWindow::load() {
 
 void MainWindow::setStart() {
     ui->widgetGraph->setAction(CanvasAction::START);
-    ui->labelStatus->setText(QString("[ЛКМ] Установить начальную точку, [ПКМ] Отмена"));
+    ui->labelStatus->setText(QString("[ЛКМ] Установить начальную точку, [ПКМ] Завершить"));
 }
 
 void MainWindow::setEnd() {
     ui->widgetGraph->setAction(CanvasAction::END);
-    ui->labelStatus->setText(QString("[ЛКМ] Установить финиш, [ПКМ] Отмена"));
+    ui->labelStatus->setText(QString("[ЛКМ] Установить финиш, [ПКМ] Завершить"));
 }
 
 void MainWindow::createPoly() {
@@ -61,10 +62,10 @@ void MainWindow::createPoly() {
 
 void MainWindow::deletePoly() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_DELETE);
-    ui->labelStatus->setText(QString("[ЛКМ] Удалить препятствие, [ПКМ] Отмена"));
+    ui->labelStatus->setText(QString("[ЛКМ] Удалить препятствие, [ПКМ] Завершить"));
 }
 
 void MainWindow::editPoly() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_EDIT);
-    ui->labelStatus->setText(QString("[ЛКМ] Двигать точку, [Shift+ЛКМ] Добавить точку, [ПКМ] Удалить точку, [Shift+ПКМ] Отмена"));
+    ui->labelStatus->setText(QString("[ЛКМ] Двигать точку, [Shift+ЛКМ] Добавить точку, [ПКМ] Удалить точку, [Shift+ПКМ] Завершить"));
 }
