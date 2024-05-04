@@ -39,10 +39,13 @@ signals:
 protected:
     Field* field = 0;
     CanvasAction action = WALKNESS;
+    bool debugKey = false;
 
+    bool event(QEvent* e);
     void showEvent(QShowEvent* event);
     void paintEvent(QPaintEvent*);
-    bool event(QEvent* e);
+    void keyPressEvent(QKeyEvent* e);
+    void keyReleaseEvent(QKeyEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);

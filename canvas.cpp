@@ -2,6 +2,7 @@
 #include "qapplication.h"
 
 Canvas::Canvas(QWidget* parent) : QWidget(parent) {
+    setFocusPolicy(Qt::StrongFocus);
     setAttribute(Qt::WA_Hover);
 }
 
@@ -38,8 +39,11 @@ void Canvas::setAction(CanvasAction a) {
 
 void Canvas::showEvent(QShowEvent*)
 {
-    QSize canvasSize = minimumSize();
-    this->field = new Field(canvasSize.width(), canvasSize.height());
+    if (this->field == 0) {
+        qDebug() << "Canvas::show";
+        QSize canvasSize = minimumSize();
+        this->field = new Field(canvasSize.width(), canvasSize.height());
+    }
 }
 
 void Canvas::paintEvent(QPaintEvent*)
@@ -76,6 +80,77 @@ bool Canvas::event(QEvent* e)
             break;
     }
     return QWidget::event(e);
+}
+
+void Canvas::keyPressEvent(QKeyEvent* event)
+{
+    switch (event->key()) {
+        case Qt::Key_D:
+            debugKey = true;
+            break;
+    }
+    update();
+}
+
+void Canvas::keyReleaseEvent(QKeyEvent* event)
+{
+    switch (event->key()) {
+        case Qt::Key_D:
+            debugKey = false;
+            break;
+        case Qt::Key_G: // [G]rid
+            if (!debugKey) break;
+            if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                field->dGrid = !field->dGrid;
+                emit status(QString("Отладка: переключение сетки"));
+            } else {
+                field->dGridOutline = !field->dGridOutline;
+                emit status(QString("Отладка: переключение границ сетки"));
+            }
+            update();
+            break;
+        case Qt::Key_O: // [O]bstacles
+            if (!debugKey) break;
+            field->dNoObstacles = !field->dNoObstacles;
+            update();
+            emit status(QString("Отладка: переключение видимости препятствий"));
+            break;
+        case Qt::Key_P: // [P]ath
+            if (!debugKey) break;
+            field->dNoPath = !field->dNoPath;
+            update();
+            emit status(QString("Отладка: переключение видимости путей"));
+            break;
+        case Qt::Key_Up: // Raise grid size
+            if (!debugKey) break;
+            field->cellSize *= 2;
+            if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                field->regenMesh();
+                update();
+                emit status(QString("Отладка: увеличить разрешение сетки до %1").arg(field->cellSize));
+            } else {
+                emit status(QString("Отладка: увеличить разрешение сетки до %1 (без регенерации)").arg(field->cellSize));
+            }
+            break;
+        case Qt::Key_Down: // Lower grid size (min 2)
+            if (!debugKey) break;
+            if (field->cellSize != 2) field->cellSize /= 2;
+            if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                field->regenMesh();
+                update();
+                emit status(QString("Отладка: снизить разрешение сетки до %1").arg(field->cellSize));
+            } else {
+                emit status(QString("Отладка: снизить разрешение сетки до %1 (без регенерации)").arg(field->cellSize));
+            }
+            break;
+        case Qt::Key_M: // [M]esh regen
+            if (!debugKey) break;
+            field->regenMesh();
+            update();
+            emit status(QString("Отладка: переключение видимости путей"));
+            break;
+    }
+    update();
 }
 
 void Canvas::mousePressEvent(QMouseEvent* event) {
