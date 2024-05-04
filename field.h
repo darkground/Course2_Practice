@@ -69,6 +69,7 @@ public:
     void beginDrag(QPoint from);
     bool moveDrag(QPoint where);
     void endDrag();
+    void finishDrag();
     void stopDrag();
 
     Obstacle* getObstacle(const QPoint& point);

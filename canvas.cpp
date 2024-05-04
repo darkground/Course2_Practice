@@ -7,42 +7,47 @@ Canvas::Canvas(QWidget* parent) : QWidget(parent) {
 }
 
 Canvas::~Canvas() {
-    delete this->field;
+    delete field;
 }
 
 void Canvas::setAction(CanvasAction a) {
-    switch (this->action) {
+    switch (action) {
         case POLYGON_CREATE:
-            this->field->stopDraw();
-            update();
+            field->stopDraw();
             break;
         case POLYGON_EDIT:
-            this->field->endDrag();
-            update();
+            field->stopDrag();
             break;
+        case POLYGON_DELETE:
+            field->regenMesh();
+            field->findPath();
+            break;
+        case START:
+        case END:
+            field->findPath();
         default:
             break;
     }
     switch (a) {
         case POLYGON_CREATE:
-            this->field->startDraw();
+            field->startDraw();
             break;
         case POLYGON_EDIT:
-            this->field->startDrag();
-            update();
+            field->startDrag();
             break;
         default:
             break;
     }
-    this->action = a;
+    update();
+    action = a;
 }
 
 void Canvas::showEvent(QShowEvent*)
 {
-    if (this->field == 0) {
+    if (field == 0) {
         qDebug() << "Canvas::show";
         QSize canvasSize = minimumSize();
-        this->field = new Field(canvasSize.width(), canvasSize.height());
+        field = new Field(canvasSize.width(), canvasSize.height());
     }
 }
 
@@ -59,7 +64,7 @@ void Canvas::paintEvent(QPaintEvent*)
     p.drawRect(0, 0, canvasSize.width() - 1, canvasSize.height() - 1);
 
     // Drawing map
-    this->field->draw(&p);
+    field->draw(&p);
 
     p.end();
 }
@@ -154,15 +159,13 @@ void Canvas::keyReleaseEvent(QKeyEvent* event)
 }
 
 void Canvas::mousePressEvent(QMouseEvent* event) {
-    switch (this->action) {
+    switch (action) {
         case POLYGON_EDIT: {
             if (event->button() == Qt::LeftButton) {
                 QPoint pos = event->pos();
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
-                    this->field->beginDrag(pos);
-                } else {
-                    this->field->addPointObstacle(pos);
-                }
+                    field->beginDrag(pos);
+                } else field->addPointObstacle(pos);
             }
             update();
             break;
@@ -173,10 +176,10 @@ void Canvas::mousePressEvent(QMouseEvent* event) {
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent* event) {
-    switch (this->action) {
+    QPoint pos = event->pos();
+    switch (action) {
         case POLYGON_EDIT: {
-            QPoint pos = event->pos();
-            if (this->field->moveDrag(pos)) {
+            if (field->moveDrag(pos)) {
                 emit status(QString("Изменение препятствия: точка перемещена в [%1, %2]").arg(pos.x()).arg(pos.y()));
                 update();
             }
@@ -189,70 +192,66 @@ void Canvas::mouseMoveEvent(QMouseEvent* event) {
 
 void Canvas::mouseReleaseEvent(QMouseEvent* event)
 {
-    switch (this->action) {
+    QPoint pos = event->pos();
+    switch (action) {
         case WALKNESS: {
             if (event->button() == Qt::LeftButton) {
-                QPoint pos = event->pos();
-                int w = this->field->getFactorMap(event->pos()) * 100;
+                int w = field->getFactorMap(pos) * 100;
                 emit status(QString("Непроходимость в [%1, %2] = %3").arg(pos.x()).arg(pos.y()).arg(w) + QString("%"));
             }
             break;
         }
         case START: {
             if (event->button() == Qt::LeftButton) {
-                QPoint pos = event->pos();
-                this->field->setStart(pos);
+                field->setStart(pos);
                 emit status(QString("Старт: установлен в [%1, %2]").arg(pos.x()).arg(pos.y()));
             } else {
-                emit status(QString("Старт: установка отменена"));
+                field->findPath();
+                emit status(QString("Старт: установка завершена"));
+                action = WALKNESS;
             }
-            this->field->findPath();
-            this->action = WALKNESS;
             update();
             break;
         }
         case END: {
             if (event->button() == Qt::LeftButton) {
-                QPoint pos = event->pos();
-                this->field->setEnd(pos);
+                field->setEnd(pos);
                 emit status(QString("Финиш: установлен в [%1, %2]").arg(pos.x()).arg(pos.y()));
             } else {
-                emit status(QString("Финиш: установка отменена"));
+                field->findPath();
+                emit status(QString("Финиш: установка завершена"));
+                action = WALKNESS;
             }
-            this->field->findPath();
-            this->action = WALKNESS;
             update();
             break;
         }
         case POLYGON_CREATE: {
             if (event->button() == Qt::LeftButton) {
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
-                    if (this->field->doDraw(event->pos())) {
-                        int c = this->field->getDraw()->count();
-                        emit status(QString("Создание препятствия: %1 точек").arg(c));
+                    if (field->doDraw(pos)) {
+                        emit status(QString("Создание препятствия: %1 точек").arg(field->getDraw()->count()));
                     } else {
                         emit status(QString("Создание препятствия: препятствия не должны пересекаться"));
                     }
                 } else {
-                    this->field->undoDraw();
-                    int c = this->field->getDraw()->count();
-                    emit status(QString("Создание препятствия: %1 точек").arg(c));
+                    field->undoDraw();
+                    emit status(QString("Создание препятствия: %1 точек").arg(field->getDraw()->count()));
                 }
             } else if (event->button() == Qt::RightButton) {
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
                     bool ok;
                     double w = QInputDialog::getDouble(this, "Непроходимость", "Введите непроходиость:", 0.5, 0., 1., 2, &ok, Qt::WindowFlags(), 0.01);
                     if (ok) {
-                        this->field->endDraw(w);
-                        emit objects(this->field->polyCount());
+                        field->endDraw(w);
+                        field->findPath();
+                        emit objects(field->polyCount());
                         emit status(QString("Создание препятствия: завершено"));
-                        this->field->findPath();
-                        this->action = WALKNESS;
+                        action = WALKNESS;
                     }
                 } else {
-                    this->field->stopDraw();
+                    field->stopDraw();
                     emit status(QString("Создание препятствия: действие отменено"));
-                    this->action = WALKNESS;
+                    action = WALKNESS;
                 }
             }
             update();
@@ -260,39 +259,32 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
         }
         case POLYGON_DELETE: {
             if (event->button() == Qt::LeftButton) {
-                if (this->field->removeObstacle(event->pos())) {
-                    emit objects(this->field->polyCount());
+                if (field->removeObstacle(pos)) {
+                    emit objects(field->polyCount());
                     emit status(QString("Удаление препятствия: удалено"));
-                    this->field->findPath();
-                    this->action = WALKNESS;
-                } else {
-                    emit status(QString("Удаление препятствия: препятствие не найдено"));
-                }
+                } else emit status(QString("Удаление препятствия: препятствие не найдено"));
             } else if (event->button() == Qt::RightButton) {
+                field->regenMesh();
+                field->findPath();
                 emit status(QString("Удаление препятствия: действие отменено"));
-                this->action = WALKNESS;
+                action = WALKNESS;
             }
             update();
             break;
         }
         case POLYGON_EDIT: {
-            if (event->button() == Qt::LeftButton) {
-                this->field->endDrag();
-            } else {
+            if (event->button() == Qt::LeftButton) field->finishDrag();
+            else {
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
-                    bool r = this->field->removePointObstacle(event->pos());
-                    if (r) {
-                        emit objects(this->field->polyCount());
+                    if (field->removePointObstacle(pos)) {
+                        emit objects(field->polyCount());
                         emit status(QString("Изменение препятствия: точка удалена"));
-                    } else {
-                        emit status(QString("Изменение препятствия: точка не найдена"));
-                    }
+                    } else emit status(QString("Изменение препятствия: точка не найдена"));
                 } else {
-                    this->field->endDrag();
-                    this->field->stopDrag();
+                    field->endDrag();
+                    field->findPath();
                     emit status(QString("Изменение препятствия: завершено"));
-                    this->field->findPath();
-                    this->action = WALKNESS;
+                    action = WALKNESS;
                 }
             }
             update();
@@ -306,8 +298,8 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
 void Canvas::load(QString path)
 {
     QSize canvasSize = size();
-    this->field->resizeMap(canvasSize.width(), canvasSize.height());
-    int code = this->field->loadMap(path);
+    field->resizeMap(canvasSize.width(), canvasSize.height());
+    int code = field->loadMap(path);
     switch (code) {
         case -1:
             emit status(QString("Загрузка карты: XML-файл не найден"));
@@ -320,7 +312,7 @@ void Canvas::load(QString path)
             break;
         default:
             emit status(QString("Загрузка карты: XML-файл успешно загружен"));
-            emit objects(this->field->polyCount());
+            emit objects(field->polyCount());
             update();
             break;
     }

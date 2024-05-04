@@ -433,9 +433,19 @@ bool Field::moveDrag(QPoint where) {
 //!
 //! \brief Снять захват точки
 //!
-void Field::endDrag() {
+void Field::finishDrag() {
     dragPoly = 0;
     dragPoint = 0;
+    qInfo() << "Field::polyDrag" << "Finish";
+}
+
+//!
+//! \brief Подтвердить захват точки
+//!
+void Field::endDrag() {
+    finishDrag();
+    stopDrag();
+    regenMesh();
     qInfo() << "Field::polyDrag" << "End";
 }
 
@@ -446,7 +456,6 @@ void Field::endDrag() {
 //!
 void Field::stopDrag() {
     dragFlag = false;
-    regenMesh();
     qInfo() << "Field::polyDrag" << "Stop";
 }
 
