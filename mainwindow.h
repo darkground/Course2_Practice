@@ -30,5 +30,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    bool debugKey = false;
+
+    void keyPressEvent(QKeyEvent* event);
+    void keyReleaseEvent(QKeyEvent* event);
 };
 #endif // MAINWINDOW_H

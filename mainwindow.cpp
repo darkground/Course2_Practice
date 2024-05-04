@@ -7,9 +7,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->widgetGraph, &Canvas::coords, this, &MainWindow::coords);
-    connect(ui->widgetGraph, &Canvas::objects, this, &MainWindow::objects);
-    connect(ui->widgetGraph, &Canvas::status, this, &MainWindow::status);
+    connect(ui->widgetGraph, &Canvas::coordMoved, this, &MainWindow::coords);
+    connect(ui->widgetGraph, &Canvas::objectsUpdated, this, &MainWindow::objects);
+    connect(ui->widgetGraph, &Canvas::statusUpdated, this, &MainWindow::status);
 
     connect(ui->btnStart, &QPushButton::clicked, this, &MainWindow::setStart);
     connect(ui->btnFinish, &QPushButton::clicked, this, &MainWindow::setEnd);
@@ -24,6 +24,76 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event) {
+    switch (event->key()) {
+    case Qt::Key_D:
+        debugKey = true;
+        break;
+    }
+    update();
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent* event) {
+    Field* field = ui->widgetGraph->getField();
+    switch (event->key()) {
+        case Qt::Key_D:
+            debugKey = false;
+            break;
+        case Qt::Key_G: // [G]rid
+            if (!debugKey) break;
+            if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                field->dGrid = !field->dGrid;
+                status(QString("Отладка: переключение сетки"));
+            } else {
+                field->dGridOutline = !field->dGridOutline;
+                status(QString("Отладка: переключение границ сетки"));
+            }
+            update();
+            break;
+        case Qt::Key_O: // [O]bstacles
+            if (!debugKey) break;
+            field->dNoObstacles = !field->dNoObstacles;
+            update();
+            status(QString("Отладка: переключение видимости препятствий"));
+            break;
+        case Qt::Key_P: // [P]ath
+            if (!debugKey) break;
+            field->dNoPath = !field->dNoPath;
+            update();
+            status(QString("Отладка: переключение видимости путей"));
+            break;
+        case Qt::Key_Up: // Raise grid size
+            if (!debugKey) break;
+            field->cellSize *= 2;
+            if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                field->regenMesh();
+                update();
+                status(QString("Отладка: увеличить разрешение сетки до %1").arg(field->cellSize));
+            } else {
+                status(QString("Отладка: увеличить разрешение сетки до %1 (без регенерации)").arg(field->cellSize));
+            }
+            break;
+        case Qt::Key_Down: // Lower grid size (min 2)
+            if (!debugKey) break;
+            if (field->cellSize != 2) field->cellSize /= 2;
+            if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
+                field->regenMesh();
+                update();
+                status(QString("Отладка: снизить разрешение сетки до %1").arg(field->cellSize));
+            } else {
+                status(QString("Отладка: снизить разрешение сетки до %1 (без регенерации)").arg(field->cellSize));
+            }
+            break;
+        case Qt::Key_M: // [M]esh regen
+            if (!debugKey) break;
+            field->regenMesh();
+            update();
+            status(QString("Отладка: переключение видимости путей"));
+            break;
+    }
+    ui->widgetGraph->update();
 }
 
 void MainWindow::coords(QPoint p) {
@@ -41,7 +111,7 @@ void MainWindow::status(QString s) {
 }
 
 void MainWindow::load() {
-    ui->widgetGraph->load("data.xml");
+    ui->widgetGraph->loadMap("data.xml");
     ui->widgetGraph->update();
 }
 

@@ -512,10 +512,10 @@ bool Field::removeObstacle(const Obstacle& obst) {
 //!
 //! \param point Точка
 //!
-void Field::addPointObstacle(const QPoint& point) {
+bool Field::addToObstacle(const QPoint& point) {
     Obstacle* obst = getObstacle(point);
-    if (obst == 0) return;
-    addPointObstacle(*obst, point);
+    if (obst == 0) return false;
+    return addToObstacle(*obst, point);
 }
 
 //!
@@ -526,7 +526,7 @@ void Field::addPointObstacle(const QPoint& point) {
 //! \param obst Препятствие
 //! \param point Точка
 //!
-void Field::addPointObstacle(Obstacle& obst, const QPoint& point) {
+bool Field::addToObstacle(Obstacle& obst, const QPoint& point) {
     QVector<QPoint> points = obst.poly.toVector();
     points.append(obst.poly.first());
     float idx = 0;
@@ -543,6 +543,7 @@ void Field::addPointObstacle(Obstacle& obst, const QPoint& point) {
     }
     obst.poly.insert(idx, point);
     qInfo() << "Field::addPoint" << point;
+    return true;
 }
 
 //!
@@ -552,10 +553,10 @@ void Field::addPointObstacle(Obstacle& obst, const QPoint& point) {
 //! \param point Точка
 //! \return Успех или нет
 //!
-bool Field::removePointObstacle(const QPoint& point) {
+bool Field::removeFromObstacle(const QPoint& point) {
     Obstacle* obst = getObstacle(point);
     if (obst == 0) return false;
-    return removePointObstacle(*obst, point);
+    return removeFromObstacle(*obst, point);
 }
 
 //!
@@ -566,7 +567,7 @@ bool Field::removePointObstacle(const QPoint& point) {
 //! \param point Точка
 //! \return Успех или нет
 //!
-bool Field::removePointObstacle(Obstacle& obst, const QPoint& point) {
+bool Field::removeFromObstacle(Obstacle& obst, const QPoint& point) {
     int idx = -1;
     float closest = width * height;
 

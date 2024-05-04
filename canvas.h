@@ -27,25 +27,26 @@ public:
     Canvas(QWidget* parent = 0);
     ~Canvas();
 
-    void load(QString path);
+    void loadMap(QString path);
     //void save(QString path);
+
     void setAction(CanvasAction a);
+    CanvasAction getAction();
+
+    Field* getField();
 
 signals:
-    void coords(QPoint p);
-    void status(QString s);
-    void objects(unsigned c);
+    void coordMoved(QPoint p);
+    void statusUpdated(QString s);
+    void objectsUpdated(unsigned c);
 
 protected:
     Field* field = 0;
     CanvasAction action = WALKNESS;
-    bool debugKey = false;
 
     bool event(QEvent* e);
     void showEvent(QShowEvent* event);
     void paintEvent(QPaintEvent*);
-    void keyPressEvent(QKeyEvent* e);
-    void keyReleaseEvent(QKeyEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);

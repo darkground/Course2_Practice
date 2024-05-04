@@ -68,17 +68,17 @@ public:
     void startDrag();
     void beginDrag(QPoint from);
     bool moveDrag(QPoint where);
-    void endDrag();
     void finishDrag();
+    void endDrag();
     void stopDrag();
 
     Obstacle* getObstacle(const QPoint& point);
     bool removeObstacle(const QPoint& point);
     bool removeObstacle(const Obstacle& obstacle);
-    void addPointObstacle(const QPoint& point);
-    void addPointObstacle(Obstacle& obst, const QPoint& point);
-    bool removePointObstacle(const QPoint& point);
-    bool removePointObstacle(Obstacle& obst, const QPoint& point);
+    bool removeFromObstacle(const QPoint& point);
+    bool removeFromObstacle(Obstacle& obst, const QPoint& point);
+    bool addToObstacle(const QPoint& point);
+    bool addToObstacle(Obstacle& obst, const QPoint& point);
 
     float findPath();
     void aStarN(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, float>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
