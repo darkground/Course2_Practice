@@ -18,18 +18,21 @@ public:
 private slots:
     void load();
     //void save();
-    void setStart();
-    void setEnd();
-    void createPoly();
-    void deletePoly();
-    void editPoly();
-
-    void coords(QPoint p);
-    void objects(unsigned c);
-    void status(QString s);
+    void actionStart();
+    void actionEnd();
+    void actionCreate();
+    void actionDelete();
+    void actionEdit();
+    
+    void coordMoved(QPoint p);
+    void objectsUpdated(unsigned c);
+    void statusUpdated(QString s);
 
 private:
     Ui::MainWindow *ui;
+    QPalette def;
+    QPalette act;
+
     bool debugKey = false;
 
     void keyPressEvent(QKeyEvent* event);

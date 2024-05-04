@@ -94,4 +94,40 @@ bool lineIntersectsPolygon(const QLine& line, const QPolygon& polygon) {
     return polygon.intersects(t);
 }
 
+QPoint polygonCentroid(const QPolygon& poly) {
+    QPoint centroid = {0, 0};
+    double signedArea = 0.0;
+    int x0 = 0.0;
+    int y0 = 0.0;
+    int x1 = 0.0;
+    int y1 = 0.0;
+    int a = 0.0;
+
+    for (int i = 0; i < poly.size() - 1; ++i) {
+        x0 = poly[i].x();
+        y0 = poly[i].y();
+        x1 = poly[i+1].x();
+        y1 = poly[i+1].y();
+        a = x0 * y1 - x1 * y0;
+        signedArea += a;
+        centroid.rx() += (x0 + x1) * a;
+        centroid.ry() += (y0 + y1) * a;
+    }
+
+    x0 = poly[poly.size()-1].x();
+    y0 = poly[poly.size()-1].y();
+    x1 = poly[0].x();
+    y1 = poly[0].y();
+    a = x0 * y1 - x1 * y0;
+    signedArea += a;
+    centroid.rx() += (x0 + x1)*a;
+    centroid.ry() += (y0 + y1)*a;
+
+    signedArea *= 0.5;
+    centroid.rx() /= (6.0 * signedArea);
+    centroid.ry() /= (6.0 * signedArea);
+
+    return centroid;
+}
+
 #endif // UTILS_H

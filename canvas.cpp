@@ -139,9 +139,8 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
                 field->setStart(pos);
                 emit statusUpdated(QString("Старт: установлен в [%1, %2]").arg(pos.x()).arg(pos.y()));
             } else {
-                field->findPath();
+                setAction(WALKNESS);
                 emit statusUpdated(QString("Старт: установка завершена"));
-                action = WALKNESS;
             }
             update();
             break;
@@ -151,9 +150,8 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
                 field->setEnd(pos);
                 emit statusUpdated(QString("Финиш: установлен в [%1, %2]").arg(pos.x()).arg(pos.y()));
             } else {
-                field->findPath();
+                setAction(WALKNESS);
                 emit statusUpdated(QString("Финиш: установка завершена"));
-                action = WALKNESS;
             }
             update();
             break;
@@ -177,14 +175,13 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
                     if (ok) {
                         field->endDraw(w);
                         field->findPath();
+                        setAction(WALKNESS);
                         emit objectsUpdated(field->polyCount());
                         emit statusUpdated(QString("Создание препятствия: завершено"));
-                        action = WALKNESS;
                     }
                 } else {
-                    field->stopDraw();
+                    setAction(WALKNESS);
                     emit statusUpdated(QString("Создание препятствия: действие отменено"));
-                    action = WALKNESS;
                 }
             }
             update();
@@ -197,10 +194,8 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
                     emit statusUpdated(QString("Удаление препятствия: удалено"));
                 } else emit statusUpdated(QString("Удаление препятствия: препятствие не найдено"));
             } else if (event->button() == Qt::RightButton) {
-                field->regenMesh();
-                field->findPath();
+                setAction(WALKNESS);
                 emit statusUpdated(QString("Удаление препятствия: завершено"));
-                action = WALKNESS;
             }
             update();
             break;
@@ -216,8 +211,8 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
                 } else {
                     field->endDrag();
                     field->findPath();
+                    setAction(WALKNESS);
                     emit statusUpdated(QString("Изменение препятствия: завершено"));
-                    action = WALKNESS;
                 }
             }
             update();

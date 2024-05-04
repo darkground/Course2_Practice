@@ -14,32 +14,38 @@ Field::~Field() {
 
 void Field::draw(QPainter* painter) {
     QPen p;
+    painter->setFont(QFont("Times", 16));
 
     if (dGrid) {
-        p.setColor(dGridOutline ? QColor(0, 0, 0, 50) : QColor(0, 0, 0, 0));
+        p.setColor(dGridOutline ? outlineGrid : QColor(0, 0, 0, 0));
         painter->setPen(p);
         for (auto it = mesh.keyValueBegin(); it != mesh.keyValueEnd(); ++it) {
             QPoint startPoint = it->second.realCoord;
-            QColor sqColor = mix(Field::fillEasy, Field::fillHard, it->second.walkness);
+            QColor sqColor = mix(easyObstacle, hardObstacle, it->second.walkness);
             painter->setBrush(sqColor);
-            painter->drawRect(startPoint.x(), startPoint.y(), Field::cellSize, Field::cellSize);
+            painter->drawRect(startPoint.x(), startPoint.y(), cellSize, cellSize);
         }
     }
 
-    p.setWidth(Field::polyOutlineWidth);
-    p.setColor(Field::outline);
-    painter->setPen(p);
-
     if (!dNoObstacles) {
+        p.setWidth(polyWidth);
+        p.setColor(outlineObstacle);
+        painter->setPen(p);
         for (Obstacle& obst : obstacles) {
-            QColor polyColor = mix(Field::fillEasy, Field::fillHard, obst.walkness);
+            QColor polyColor = mix(easyObstacle, hardObstacle, obst.walkness);
             painter->setBrush(polyColor);
             painter->drawPolygon(obst.poly);
+            QPoint center = polygonCentroid(obst.poly);
+            if (obst.poly.boundingRect().contains(center)) {
+                QRect rect(center - QPoint(30, 30), QSize(60, 60));
+                int w = obst.walkness * 100;
+                painter->drawText(rect, Qt::AlignCenter, QString::number(w) + QString("%"));
+            }
         }
     }
 
     if (!dNoPath) {
-        p.setColor(Qt::red);
+        p.setColor(path);
         painter->setPen(p);
         for (int i = 1; i < way.length(); i++) {
             MeshPoint& prev = way[i-1];
@@ -48,17 +54,15 @@ void Field::draw(QPainter* painter) {
         }
     }
 
-    p.setColor(Field::outline);
-    painter->setPen(p);
-
     if (drawFlag) {
-        p.setColor(Field::drawBorder);
+        p.setColor(outlineDraw);
         painter->setPen(p);
-        painter->setBrush(Field::fillEasy);
+        painter->setBrush(easyObstacle);
         painter->drawPolygon(*drawPoly);
+
         painter->setBrush(QColor(0, 0, 0, 0));
         for (QPoint& point : *drawPoly) {
-            p.setColor(point == drawPoly->last() ? Field::drawLastPoint : Field::drawPoint);
+            p.setColor(point == drawPoly->last() ? lastPointDraw : pointDraw);
             painter->setPen(p);
             painter->drawEllipse(point, 6, 6);
         }
@@ -68,21 +72,24 @@ void Field::draw(QPainter* painter) {
         painter->setBrush(QColor(0, 0, 0, 0));
         for (Obstacle& o : obstacles) {
             for (QPoint& point : o.poly) {
-                p.setColor(&point == dragPoint ? Field::drawLastPoint : Field::drawPoint);
+                p.setColor(&point == dragPoint ? lastPointDraw : pointDraw);
                 painter->setPen(p);
                 painter->drawEllipse(point, 6, 6);
             }
         }
     }
 
-    p.setWidth(Field::pointOutlineWidth);
+    p.setColor(outlineObstacle);
+    p.setWidth(pointWidth);
     painter->setPen(p);
+
     if (start.has_value()) {
-        painter->setBrush(Field::fillStart);
+        painter->setBrush(fillStart);
         painter->drawEllipse(*start, 6, 6);
     }
+
     if (end.has_value()) {
-        painter->setBrush(Field::fillEnd);
+        painter->setBrush(fillEnd);
         painter->drawEllipse(*end, 6, 6);
     }
 }
@@ -340,7 +347,6 @@ QPolygon* Field::getDraw() {
 //! Подтвердить рисование полигона, создав препятствие с данной непроходимостью.
 //! Функция должна быть вызвана после startDraw() и до stopDraw(),
 //! иначе эффекта не будет.
-//! Эта функция автоматически останавливает рисовку, вызывая stopDraw().
 //!
 //! \param w Непроходимость полигона
 //!
@@ -349,7 +355,6 @@ void Field::endDraw(double w) {
     qInfo() << "Field::polyDraw" << "End, W =" << w;
     obstacles.append(Obstacle(*drawPoly, w));
     regenMesh();
-    stopDraw();
 }
 
 //!
@@ -444,7 +449,6 @@ void Field::finishDrag() {
 //!
 void Field::endDrag() {
     finishDrag();
-    stopDrag();
     regenMesh();
     qInfo() << "Field::polyDrag" << "End";
 }
