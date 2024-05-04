@@ -47,6 +47,10 @@ double simpleDistance(const QPoint& p1, const QPoint& p2) {
     return qAbs(p1.x() - p2.x()) + qAbs(p1.y() - p2.y());
 }
 
+double vectorLength(const QPoint& p1) {
+    return qSqrt(qPow(p1.x(), 2) + qPow(p1.y(), 2));
+}
+
 //!
 //! Проецировать точку на линию
 //!
