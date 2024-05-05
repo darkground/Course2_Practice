@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->widgetGraph, &Canvas::coordMoved, this, &MainWindow::coordMoved);
     connect(ui->widgetGraph, &Canvas::objectsUpdated, this, &MainWindow::objectsUpdated);
     connect(ui->widgetGraph, &Canvas::statusUpdated, this, &MainWindow::statusUpdated);
+    connect(ui->widgetGraph, &Canvas::sizeChanged, this, &MainWindow::sizeChanged);
 
     connect(ui->btnStart, &QPushButton::clicked, this, &MainWindow::actionStart);
     connect(ui->btnFinish, &QPushButton::clicked, this, &MainWindow::actionEnd);
@@ -19,8 +20,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnDelete, &QPushButton::clicked, this, &MainWindow::actionDelete);
     connect(ui->btnEdit, &QPushButton::clicked, this, &MainWindow::actionEdit);
     
-    connect(ui->btnLoad, &QPushButton::clicked, this, &MainWindow::load);
-    //connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::save);
+    connect(ui->btnLoad, &QPushButton::clicked, this, &MainWindow::mapLoad);
+    connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::mapSave);
+
+    connect(ui->labelSize, &QPushButton::clicked, this, &MainWindow::resizeField);
 }
 
 MainWindow::~MainWindow()
@@ -94,22 +97,22 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
             update();
             statusUpdated(QString("Отладка: переключение видимости путей"));
             break;
-        case Qt::Key_1:
+        case Qt::Key_1: // [1] Walkness
             actionWalk();
             break;
-        case Qt::Key_2:
+        case Qt::Key_2: // [2] Creating
             actionCreate();
             break;
-        case Qt::Key_3:
+        case Qt::Key_3: // [3] Deleting
             actionDelete();
             break;
-        case Qt::Key_4:
+        case Qt::Key_4: // [4] Editing
             actionEdit();
             break;
-        case Qt::Key_5:
+        case Qt::Key_5: // [5] Start point
             actionStart();
             break;
-        case Qt::Key_6:
+        case Qt::Key_6: // [6] End point
             actionEnd();
             break;
     }
@@ -117,8 +120,13 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
 }
 
 void MainWindow::coordMoved(QPoint p) {
-    QString s = QString("Координаты: [%1, %2]").arg(p.x()).arg(p.y());
-    ui->labelCoords->setText(s);
+    if (p == QPoint(-1, -1)) {
+        QString s = QString("X, Y: [-, -]");
+        ui->labelCoords->setText(s);
+    } else {
+        QString s = QString("X, Y: [%1, %2]").arg(p.x()).arg(p.y());
+        ui->labelCoords->setText(s);
+    }
 }
 
 void MainWindow::objectsUpdated(unsigned c) {
@@ -130,9 +138,18 @@ void MainWindow::statusUpdated(QString s) {
     ui->labelStatus->setText(s);
 }
 
-void MainWindow::load() {
+void MainWindow::sizeChanged(QSize sz) {
+    QString s = QString("%1 x %2").arg(sz.width()).arg(sz.height());
+    ui->labelSize->setText(s);
+}
+
+void MainWindow::mapLoad() {
     ui->widgetGraph->loadMap("data.xml");
     ui->widgetGraph->update();
+}
+
+void MainWindow::mapSave() {
+    ui->widgetGraph->saveMap("data.xml");
 }
 
 void MainWindow::actionWalk() {
@@ -157,4 +174,13 @@ void MainWindow::actionDelete() {
 
 void MainWindow::actionEdit() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_EDIT);
+}
+
+void MainWindow::resizeField() {
+    bool ok;
+    int w = QInputDialog::getInt(this, "Изменение размера карты", "Введите ширину:", 800, 100, 2000, 1, &ok, Qt::WindowFlags());
+    if (!ok) return;
+    int h = QInputDialog::getInt(this, "Изменение размера карты", "Введите высоту:", 500, 100, 2000, 1, &ok, Qt::WindowFlags());
+    if (!ok) return;
+    ui->widgetGraph->resizeMap(QSize(w, h));
 }

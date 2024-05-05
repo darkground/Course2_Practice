@@ -28,8 +28,9 @@ public:
     Canvas(QWidget* parent = 0);
     ~Canvas();
 
-    void loadMap(QString path);
-    //void save(QString path);
+    void loadMap(const QString& path);
+    void saveMap(const QString& path);
+    void resizeMap(QSize size);
 
     void setAction(CanvasAction a);
 
@@ -39,6 +40,7 @@ signals:
     void coordMoved(QPoint p);
     void statusUpdated(QString s);
     void objectsUpdated(unsigned c);
+    void sizeChanged(QSize s);
 
 protected:
     Field* field = 0;

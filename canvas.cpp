@@ -42,7 +42,7 @@ Field* Canvas::getField() {
 void Canvas::showEvent(QShowEvent*) {
     if (field == 0) {
         QSize canvasSize = minimumSize();
-        field = new Field(canvasSize.width(), canvasSize.height());
+        resizeMap(canvasSize);
     }
 }
 
@@ -124,7 +124,7 @@ void Canvas::paintEvent(QPaintEvent*) {
 bool Canvas::event(QEvent* e) {
     switch(e->type()) {
         case QEvent::HoverLeave: {
-            emit coordMoved(QPoint(0, 0));
+            emit coordMoved(QPoint(-1, -1));
             return true;
         }
         case QEvent::HoverMove: {
@@ -269,9 +269,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-void Canvas::loadMap(QString path) {
-    QSize canvasSize = size();
-    field->resizeMap(canvasSize.width(), canvasSize.height());
+void Canvas::loadMap(const QString& path) {
     int code = field->loadMap(path);
     switch (code) {
     case -1:
@@ -284,11 +282,32 @@ void Canvas::loadMap(QString path) {
         emit statusUpdated(QString("Загрузка карты: XML-файл хранит недопустимые значения"));
         break;
     default:
+        setMinimumSize(field->size());
+        emit sizeChanged(field->size());
         emit statusUpdated(QString("Загрузка карты: XML-файл успешно загружен"));
         emit objectsUpdated(field->polyCount());
         update();
         break;
     }
+}
+
+void Canvas::saveMap(const QString& path) {
+    int code = field->saveMap(path);
+    switch (code) {
+    case -1:
+        emit statusUpdated(QString("Сохранение карты: неудачно"));
+        break;
+    default:
+        emit statusUpdated(QString("Сохранение карты: сохранено"));
+        break;
+    }
+}
+
+void Canvas::resizeMap(QSize size) {
+    field = new Field(size.width(), size.height());
+    setMinimumSize(size);
+    update();
+    emit sizeChanged(size);
 }
 
 // Polygon Editing -- Редактирование полигонов

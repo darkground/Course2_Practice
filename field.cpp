@@ -76,32 +76,38 @@ void Field::draw(QPainter* painter) {
 //! \return -2 если файл имеет неверную структуру
 //! \return -3 если файл имеет неверные значения
 //!
-int Field::loadMap(QString path) {
+int Field::loadMap(const QString& path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return -1;
     QXmlStreamReader xml(&file);
     bool ok;
-    while (!xml.atEnd() && !xml.hasError())
-    {
+    while (!xml.atEnd() && !xml.hasError()) {
         QXmlStreamReader::TokenType token = xml.readNext();
-        if (token == QXmlStreamReader::StartElement)
-        {
+        if (token == QXmlStreamReader::StartElement) {
             if (xml.name() == QString("polygons")) {
+                QXmlStreamAttributes polygonsAttrs = xml.attributes();
+                if (!polygonsAttrs.hasAttribute("width") || !polygonsAttrs.hasAttribute("height")) return -2;
+                int wid = polygonsAttrs.value("width").toInt(&ok);
+                if (!ok || wid < minWidth || wid > maxWidth) return -3;
+                int hei = polygonsAttrs.value("height").toInt(&ok);
+                if (!ok || hei < minHeight || hei > maxHeight) return -3;
+                resizeMap(wid, hei);
+                if (!polygonsAttrs.hasAttribute("width")) return -2;
                 while (!(xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QString("polygons"))) {
                     if (xml.readNext() == QXmlStreamReader::StartElement && xml.name() == QString("poly")) {
                         QXmlStreamAttributes polyAttrs = xml.attributes();
                         if (!polyAttrs.hasAttribute("walkness")) return -2;
                         QPolygon poly;
                         double w = polyAttrs.value("walkness").toDouble(&ok);
-                        if (!ok || (w < 0. || w > 1.)) return -3;
+                        if (!ok || w < 0. || w > 1.) return -3;
                         while (!(xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QString("poly"))) {
                             if (xml.readNext() == QXmlStreamReader::StartElement && xml.name() == QString("point")) {
                                 QXmlStreamAttributes pointAttrs = xml.attributes();
                                 if (!pointAttrs.hasAttribute("x") || !pointAttrs.hasAttribute("y")) return -2;
                                 unsigned x = pointAttrs.value("x").toInt(&ok);
-                                if (!ok || (x < 0 || x > width)) return -3;
+                                if (!ok || x < 0 || x > width) return -3;
                                 unsigned y = pointAttrs.value("y").toInt(&ok);
-                                if (!ok || (y < 0 || y > height)) return -3;
+                                if (!ok || y < 0 || y > height) return -3;
                                 poly << QPoint(x, y);
                             }
                         }
@@ -116,7 +122,41 @@ int Field::loadMap(QString path) {
     return 0;
 }
 
-int Field::saveMap(QString path) {
+//!
+//! Сохранить карту в XML-файл
+//!
+//! \param path Путь до XML-файла
+//! \return 0 в случае успеха
+//! \return -1 если произошла ошибка
+//!
+int Field::saveMap(const QString& path) {
+    QFile file(path);
+    if (!file.open(QFile::WriteOnly | QFile::Text)) return -1;
+    QXmlStreamWriter stream(&file);
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
+
+    stream.writeStartElement("polygons");
+    stream.writeAttribute("width", QString::number(width));
+    stream.writeAttribute("height", QString::number(height));
+
+    for (Obstacle& obst : obstacles) {
+        stream.writeStartElement("poly");
+        stream.writeAttribute("walkness", QString::number(obst.walkness));
+
+        for (QPoint& pt : obst.poly) {
+            stream.writeStartElement("point");
+            stream.writeAttribute("x", QString::number(pt.x()));
+            stream.writeAttribute("y", QString::number(pt.y()));
+            stream.writeEndElement(); // point
+        }
+
+        stream.writeEndElement(); // poly
+    }
+
+    stream.writeEndElement(); // polygons
+
+    stream.writeEndDocument();
     return 0;
 }
 
@@ -216,7 +256,7 @@ MeshPoint* Field::getMesh(const QPoint& point) {
     return 0;
 }
 
-// Points
+// Points -- Точки пути
 
 //!
 //! Установить старт
@@ -497,15 +537,6 @@ float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& 
 }
 
 //!
-//! Получить количество препятствий на карте
-//!
-//! \return Количество препятствий
-//!
-unsigned Field::polyCount() {
-    return obstacles.length();
-}
-
-//!
 //! Сглаживание пути
 //! Сглаживание пути быстрым методом линейного прохода
 //!
@@ -601,4 +632,22 @@ QVector<MeshPoint> Field::splicePath(const QVector<MeshPoint>& vec, int interval
         result.append(vec[i]);
     }
     return result;
+}
+
+//!
+//! Получить количество препятствий на карте
+//!
+//! \return Количество препятствий
+//!
+unsigned Field::polyCount() {
+    return obstacles.length();
+}
+
+//!
+//! Получить размеры карты
+//!
+//! \return Размеры карты
+//!
+QSize Field::size() {
+    return QSize(width, height);
 }

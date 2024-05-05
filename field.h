@@ -30,6 +30,11 @@ public:
     static constexpr QColor fillStart = QColor(56, 186, 112);
     static constexpr QColor fillEnd = QColor(204, 103, 59);
 
+    static constexpr int minWidth = 100;
+    static constexpr int maxWidth = 2000;
+    static constexpr int minHeight = 100;
+    static constexpr int maxHeight = 2000;
+
     static constexpr float polyWidth = 2.f;
     static constexpr float pointWidth = 0.8f;
 
@@ -47,8 +52,8 @@ public:
     ~Field();
     void draw(QPainter* painter);
 
-    int loadMap(QString path);
-    int saveMap(QString path);
+    int loadMap(const QString& path);
+    int saveMap(const QString& path);
     void resizeMap(unsigned width, unsigned height);
     bool inMap(const QPoint& point);
     double getFactorMap(const QPoint& point);
@@ -78,6 +83,7 @@ public:
     QVector<MeshPoint> smoothv2Path(const QVector<MeshPoint>& vec, int maxSteps = 16);
     QVector<MeshPoint> splicePath(const QVector<MeshPoint>& vec, int interval = 2);
 
+    QSize size();
     unsigned polyCount();
 
 protected:

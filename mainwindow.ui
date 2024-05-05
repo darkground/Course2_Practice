@@ -271,6 +271,13 @@ padding: 3px;</string>
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="labelSize">
+            <property name="text">
+             <string>800 x 500</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="Line" name="line2">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -294,7 +301,7 @@ padding: 3px;</string>
           <item>
            <widget class="QLabel" name="labelCoords">
             <property name="text">
-             <string>Координаты: [-, -]</string>
+             <string>X, Y: [-, -]</string>
             </property>
            </widget>
           </item>

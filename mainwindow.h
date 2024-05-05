@@ -16,18 +16,21 @@ public:
     ~MainWindow();
 
 private slots:
-    void load();
-    //void save();
+    void mapLoad();
+    void mapSave();
     void actionWalk();
     void actionStart();
     void actionEnd();
     void actionCreate();
     void actionDelete();
     void actionEdit();
-    
+    void resizeField();
+
     void coordMoved(QPoint p);
     void objectsUpdated(unsigned c);
     void statusUpdated(QString s);
+    void sizeChanged(QSize s);
+
 
 private:
     Ui::MainWindow *ui;
