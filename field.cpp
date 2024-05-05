@@ -377,7 +377,7 @@ bool Field::removeFromObstacle(Obstacle& obst, const QPoint& point) {
     for (int i = 0; i < obst.poly.size(); i++) {
         QPoint& pt = obst.poly[i];
         float dst = euclideanDistance(pt, point);
-        if (dst < closest && dst <= 6) {// Field::pointGrabRadius) {
+        if (dst < closest && dst <= Field::pointGrabRadius) {
             idx = i;
             closest = dst;
         }
