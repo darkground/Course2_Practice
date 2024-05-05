@@ -94,6 +94,24 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
             update();
             statusUpdated(QString("Отладка: переключение видимости путей"));
             break;
+        case Qt::Key_1:
+            actionWalk();
+            break;
+        case Qt::Key_2:
+            actionCreate();
+            break;
+        case Qt::Key_3:
+            actionDelete();
+            break;
+        case Qt::Key_4:
+            actionEdit();
+            break;
+        case Qt::Key_5:
+            actionStart();
+            break;
+        case Qt::Key_6:
+            actionEnd();
+            break;
     }
     ui->widgetGraph->update();
 }
@@ -117,27 +135,26 @@ void MainWindow::load() {
     ui->widgetGraph->update();
 }
 
+void MainWindow::actionWalk() {
+    ui->widgetGraph->setAction(CanvasAction::WALKNESS);
+}
+
 void MainWindow::actionStart() {
     ui->widgetGraph->setAction(CanvasAction::START);
-    ui->labelStatus->setText(QString("[ЛКМ] Установить начальную точку, [ПКМ] Завершить"));
 }
 
 void MainWindow::actionEnd() {
     ui->widgetGraph->setAction(CanvasAction::END);
-    ui->labelStatus->setText(QString("[ЛКМ] Установить финиш, [ПКМ] Завершить"));
 }
 
 void MainWindow::actionCreate() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_CREATE);
-    ui->labelStatus->setText(QString("[ЛКМ] Добавить точку, [Shift+ЛКМ] Убрать точку, [ПКМ] Завершить, [Shift+ПКМ] Отмена"));
 }
 
 void MainWindow::actionDelete() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_DELETE);
-    ui->labelStatus->setText(QString("[ЛКМ] Удалить препятствие, [ПКМ] Завершить"));
 }
 
 void MainWindow::actionEdit() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_EDIT);
-    ui->labelStatus->setText(QString("[ЛКМ] Двигать точку, [Shift+ЛКМ] Добавить точку, [ПКМ] Удалить точку, [Shift+ПКМ] Завершить"));
 }

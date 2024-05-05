@@ -18,6 +18,7 @@ public:
 private slots:
     void load();
     //void save();
+    void actionWalk();
     void actionStart();
     void actionEnd();
     void actionCreate();

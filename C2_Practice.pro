@@ -12,7 +12,8 @@ SOURCES += \
     canvas.cpp \
     field.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    utils.cpp
 
 HEADERS += \
     canvas.h \

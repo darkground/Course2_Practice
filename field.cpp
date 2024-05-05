@@ -13,11 +13,8 @@ Field::~Field() {
 }
 
 void Field::draw(QPainter* painter) {
-    QPen p;
-    painter->setFont(QFont("Times", 16));
-
     if (dGrid) {
-        p.setColor(dGridOutline ? outlineGrid : QColor(0, 0, 0, 0));
+        QPen p(dGridOutline ? outlineGrid : QColor(0, 0, 0, 0));
         painter->setPen(p);
         for (auto it = mesh.keyValueBegin(); it != mesh.keyValueEnd(); ++it) {
             QPoint startPoint = it->second.realCoord;
@@ -28,9 +25,9 @@ void Field::draw(QPainter* painter) {
     }
 
     if (!dNoObstacles) {
-        p.setWidth(polyWidth);
-        p.setColor(outlineObstacle);
+        QPen p(outlineObstacle, polyWidth);
         painter->setPen(p);
+        painter->setFont(QFont("Times", 16));
         for (Obstacle& obst : obstacles) {
             QColor polyColor = mix(easyObstacle, hardObstacle, obst.walkness);
             painter->setBrush(polyColor);
@@ -45,7 +42,7 @@ void Field::draw(QPainter* painter) {
     }
 
     if (!dNoPath) {
-        p.setColor(path);
+        QPen p(path);
         painter->setPen(p);
         for (int i = 1; i < way.length(); i++) {
             MeshPoint& prev = way[i-1];
@@ -54,33 +51,7 @@ void Field::draw(QPainter* painter) {
         }
     }
 
-    if (drawFlag) {
-        p.setColor(outlineDraw);
-        painter->setPen(p);
-        painter->setBrush(easyObstacle);
-        painter->drawPolygon(*drawPoly);
-
-        painter->setBrush(QColor(0, 0, 0, 0));
-        for (QPoint& point : *drawPoly) {
-            p.setColor(point == drawPoly->last() ? lastPointDraw : pointDraw);
-            painter->setPen(p);
-            painter->drawEllipse(point, 6, 6);
-        }
-    }
-
-    if (dragFlag) {
-        painter->setBrush(QColor(0, 0, 0, 0));
-        for (Obstacle& o : obstacles) {
-            for (QPoint& point : o.poly) {
-                p.setColor(&point == dragPoint ? lastPointDraw : pointDraw);
-                painter->setPen(p);
-                painter->drawEllipse(point, 6, 6);
-            }
-        }
-    }
-
-    p.setColor(outlineObstacle);
-    p.setWidth(pointWidth);
+    QPen p(outlineObstacle, pointWidth);
     painter->setPen(p);
 
     if (start.has_value()) {
@@ -285,183 +256,7 @@ Waypoint Field::getEnd() {
     return end;
 }
 
-// Polygon Drawing -- Функции рисования полигонов
-
-//!
-//! \brief Начать рисование полигона
-//! Подготовить поле для рисования полигона
-//!
-void Field::startDraw() {
-    qInfo() << "Field::polyDraw" << "Start";
-    drawFlag = true;
-    drawPoly = new QPolygon();
-}
-
-//!
-//! Добавить точку в рисуемый полигон
-//!
-//! \param p Точка для добавления в полигон
-//! \return Успех добавления
-//!
-//! Функция должна быть вызвана после startDraw() и до stopDraw(),
-//! иначе эффекта не будет.
-//!
-bool Field::doDraw(QPoint p) {
-    if (!drawFlag) return false;
-    if (getFactorMap(p) != 0.) return false;
-    QPolygon poly(*drawPoly);
-    poly << p;
-    for (Obstacle& o : obstacles) {
-        if (o.poly.intersects(poly)) return false;
-    }
-    qInfo() << "Field::polyDraw" << "Append" << p;
-    (*drawPoly) << p;
-    return true;
-}
-
-//!
-//! \brief Убрать последнюю нарисованную точку
-//!
-//! Ничего не произойдёт если рисуемый полигон не имеет точек.
-//! Функция должна быть вызвана после startDraw() и до stopDraw(),
-//! иначе эффекта не будет.
-//!
-void Field::undoDraw() {
-    if (!drawFlag) return;
-    if (!drawPoly->empty()) {
-        qInfo() << "Field::polyDraw" << "Undo";
-        drawPoly->removeLast();
-    }
-}
-
-//!
-//! Получить рисуемый полигон
-//! \return Рисуемый полигон или nullptr если рисование не начато
-//!
-QPolygon* Field::getDraw() {
-    return drawPoly;
-}
-
-//!
-//! Подтвердить рисование полигона
-//! Подтвердить рисование полигона, создав препятствие с данной непроходимостью.
-//! Функция должна быть вызвана после startDraw() и до stopDraw(),
-//! иначе эффекта не будет.
-//!
-//! \param w Непроходимость полигона
-//!
-void Field::endDraw(double w) {
-    if (!drawFlag) return;
-    qInfo() << "Field::polyDraw" << "End, W =" << w;
-    obstacles.append(Obstacle(*drawPoly, w));
-    regenMesh();
-}
-
-//!
-//! \brief Выйти из режима рисовки
-//! Остановить рисовку и очистить все ресурсы.
-//!
-void Field::stopDraw() {
-    qInfo() << "Field::polyDraw" << "Stop";
-    drawFlag = false;
-    delete drawPoly;
-    drawPoly = 0;
-}
-
 // Polygon Editing -- Редактирование полигонов
-
-//!
-//! \brief Начать режим перемещения точки полигона
-//! Подготовить поле к перемещению точки полигона пользователем.
-//!
-void Field::startDrag() {
-    qInfo() << "Field::polyDrag" << "Start";
-    dragFlag = true;
-}
-
-//!
-//! Начать захват точки полигона
-//! Начать захват точки полигона от точки, данной пользователем.
-//! Если нашлись точки в радиусе Field::pointGrabRadius от данной точки,
-//! то для захвата выбирается ближайшая из них.
-//! Функция должна быть вызвана после startDrag() и до stopDrag(),
-//! иначе эффекта не будет.
-//!
-//! \param from Точка поля
-//!
-void Field::beginDrag(QPoint from) {
-    dragPoly = 0;
-    dragPoint = 0;
-    float closest = Field::pointGrabRadius;
-    for (Obstacle& obst : obstacles) {
-        for (QPoint& vertex : obst.poly) {
-            float dst = euclideanDistance(from, vertex);
-            if (dst < closest && dst <= Field::pointGrabRadius) {
-                dragPoly = &obst.poly;
-                dragPoint = &vertex;
-                closest = dst;
-            }
-        }
-    }
-    if (dragPoint != 0) qInfo() << "Field::polyDrag" << "Attach" << *dragPoint;
-    else qInfo() << "Field::polyDrag" << "Attach" << "NULL";
-}
-
-//!
-//! Передвинуть захваченную точку
-//! Эта функция передвигает раннее захваченную точку в координаты, данные пользователем.
-//! Если точка не захвачена, функция вернёт false.
-//! Если точка находится вне карты, функция вернёт false.
-//! Функция должна быть вызвана после startDrag() и до stopDrag(),
-//! иначе эффекта не будет.
-//!
-//! \param where Куда передвинуть
-//! \return Успех или нет
-//!
-bool Field::moveDrag(QPoint where) {
-    if (dragPoint == 0) return false;
-    if (!inMap(where)) return false;
-    QPolygon it = *dragPoly;
-    QPoint old = *dragPoint;
-
-    *dragPoint = where;
-
-    for (Obstacle& obst : obstacles) {
-        if (obst.poly != it && obst.poly.intersects(it)) {
-            *dragPoint = old;
-            return false;
-        }
-    }
-    return true;
-}
-
-//!
-//! \brief Снять захват точки
-//!
-void Field::finishDrag() {
-    dragPoly = 0;
-    dragPoint = 0;
-    qInfo() << "Field::polyDrag" << "Finish";
-}
-
-//!
-//! \brief Подтвердить захват точки
-//!
-void Field::endDrag() {
-    finishDrag();
-    regenMesh();
-    qInfo() << "Field::polyDrag" << "End";
-}
-
-//!
-//! \brief Выйти из режима перемещения точки
-//! Остановить перемещение и очистить ресурсы.
-//! Данная функция автоматически вызывает регенерацию сетки, т.к. произошли изменения в структуре препятствий
-//!
-void Field::stopDrag() {
-    dragFlag = false;
-    qInfo() << "Field::polyDrag" << "Stop";
-}
 
 //!
 //! Получить препятствие по точке
@@ -479,6 +274,10 @@ Obstacle* Field::getObstacle(const QPoint& point) {
         }
     }
     return 0;
+}
+
+QVector<Obstacle>& Field::getObstacles() {
+    return obstacles;
 }
 
 //!
@@ -578,7 +377,7 @@ bool Field::removeFromObstacle(Obstacle& obst, const QPoint& point) {
     for (int i = 0; i < obst.poly.size(); i++) {
         QPoint& pt = obst.poly[i];
         float dst = euclideanDistance(pt, point);
-        if (dst < closest && dst <= Field::pointGrabRadius) {
+        if (dst < closest && dst <= 6) {// Field::pointGrabRadius) {
             idx = i;
             closest = dst;
         }

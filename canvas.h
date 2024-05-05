@@ -1,6 +1,7 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
+#include <QApplication>
 #include <QWidget>
 #include <QPainter>
 #include <QEvent>
@@ -31,7 +32,6 @@ public:
     //void save(QString path);
 
     void setAction(CanvasAction a);
-    CanvasAction getAction();
 
     Field* getField();
 
@@ -44,12 +44,26 @@ protected:
     Field* field = 0;
     CanvasAction action = WALKNESS;
 
+    QPolygon* draw = 0;
+    QPolygon* attach = 0;
+    QPoint* drag = 0;
+
     bool event(QEvent* e);
     void showEvent(QShowEvent* event);
     void paintEvent(QPaintEvent*);
     void mouseReleaseEvent(QMouseEvent* e);
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
+
+    void startDrag(QPoint point);
+    bool moveDrag(QPoint point);
+    void endDrag();
+
+    void startDraw();
+    bool doDraw(QPoint point);
+    void undoDraw();
+    void confirmDraw(float w);
+    void endDraw();
 
 private:
     Ui::MainWindow* ui;

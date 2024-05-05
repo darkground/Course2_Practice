@@ -14,30 +14,29 @@
 typedef std::optional<QPoint> Waypoint;
 
 class Field {
-    const QColor outlineObstacle = QColor(26, 26, 26);
-    const QColor easyObstacle = QColor(212, 212, 212);
-    const QColor hardObstacle = QColor(74, 74, 74);
+public:
+    static constexpr QColor outlineObstacle = QColor(26, 26, 26);
+    static constexpr QColor easyObstacle = QColor(212, 212, 212);
+    static constexpr QColor hardObstacle = QColor(74, 74, 74);
 
-    const QColor path = QColor(0, 255, 0);
+    static constexpr QColor path = QColor(0, 255, 0);
 
-    const QColor outlineGrid = QColor(0, 0, 0, 50);
+    static constexpr QColor outlineGrid = QColor(0, 0, 0, 50);
 
-    const QColor pointDraw = QColor(0, 4, 64);
-    const QColor lastPointDraw = QColor(76, 76, 224);
-    const QColor outlineDraw = QColor(53, 51, 97);
+    static constexpr QColor pointDraw = QColor(0, 4, 64);
+    static constexpr QColor lastPointDraw = QColor(76, 76, 224);
+    static constexpr QColor outlineDraw = QColor(53, 51, 97);
 
-    const QColor fillStart = QColor(56, 186, 112);
-    const QColor fillEnd = QColor(204, 103, 59);
+    static constexpr QColor fillStart = QColor(56, 186, 112);
+    static constexpr QColor fillEnd = QColor(204, 103, 59);
 
-    const float polyWidth = 2.f;
-    const float pointWidth = 0.8f;
+    static constexpr float polyWidth = 2.f;
+    static constexpr float pointWidth = 0.8f;
 
-    const float pointGrabRadius = 6.;
+    static constexpr float pointGrabRadius = 6.;
 
     bool drawFlag = false;
-    bool dragFlag = false;
 
-public:
     bool dGrid = false;
     bool dGridOutline = false;
     bool dNoObstacles = false;
@@ -63,21 +62,8 @@ public:
     Waypoint getStart();
     Waypoint getEnd();
 
-    void startDraw();
-    bool doDraw(QPoint point);
-    void undoDraw();
-    void endDraw(double walk);
-    void stopDraw();
-    QPolygon* getDraw();
-
-    void startDrag();
-    void beginDrag(QPoint from);
-    bool moveDrag(QPoint where);
-    void finishDrag();
-    void endDrag();
-    void stopDrag();
-
     Obstacle* getObstacle(const QPoint& point);
+    QVector<Obstacle>& getObstacles();
     bool removeObstacle(const QPoint& point);
     bool removeObstacle(const Obstacle& obstacle);
     bool removeFromObstacle(const QPoint& point);
@@ -93,6 +79,7 @@ public:
     QVector<MeshPoint> splicePath(const QVector<MeshPoint>& vec, int interval = 2);
 
     unsigned polyCount();
+
 protected:
     unsigned width, height;
 
