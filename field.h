@@ -54,7 +54,7 @@ public:
 
     int loadMap(const QString& path);
     int saveMap(const QString& path);
-    void resizeMap(unsigned width, unsigned height);
+    void resizeMap(unsigned width, unsigned heigh, bool noRegen = false);
     bool inMap(const QPoint& point);
     double getFactorMap(const QPoint& point);
 
