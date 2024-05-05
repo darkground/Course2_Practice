@@ -41,6 +41,12 @@ double simpleDistance(const QPoint& p1, const QPoint& p2) {
     return qAbs(p1.x() - p2.x()) + qAbs(p1.y() - p2.y());
 }
 
+//!
+//! Найти длину вектора
+//!
+//! \param p1 Вектор
+//! \return Длина
+//!
 double vectorLength(const QPoint& p1) {
     return qSqrt(qPow(p1.x(), 2) + qPow(p1.y(), 2));
 }
@@ -88,6 +94,12 @@ bool lineIntersectsPolygon(const QLine& line, const QPolygon& polygon) {
     return polygon.intersects(t);
 }
 
+//!
+//! Найти центроид полигона
+//!
+//! \param poly Полигон
+//! \return Сентроид
+//!
 QPoint polygonCentroid(const QPolygon& poly) {
     QPoint centroid = {0, 0};
     double signedArea = 0.0;
