@@ -106,7 +106,7 @@ void Canvas::paintEvent(QPaintEvent*) {
             break;
         case POLYGON_EDIT:
             painter.drawText(QPoint(4, canvasSize.height() - 18), QString("Редактирование препятствий"));
-            painter.drawText(QPoint(4, canvasSize.height() - 6), QString("[ЛКМ] Двигать точку, [Shift+ЛКМ] Добавить точку, [ПКМ] Удалить точку, [Shift+ПКМ] Завершить"));
+            painter.drawText(QPoint(4, canvasSize.height() - 6), QString("[ЛКМ] Двигать точку, [Shift+ЛКМ] Добавить точку, [ПКМ] Завершить, [Shift+ПКМ] Удалить точку"));
             break;
         case START:
             painter.drawText(QPoint(4, canvasSize.height() - 18), QString("Установка начальной точки"));
@@ -249,16 +249,16 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
             if (event->button() == Qt::LeftButton) endDrag();
             else {
                 if (!QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
-                    if (field->removeFromObstacle(pos)) {
-                        emit objectsUpdated(field->polyCount());
-                        emit statusUpdated(QString("Изменение препятствия: точка удалена"));
-                    } else emit statusUpdated(QString("Изменение препятствия: точка не найдена"));
-                } else {
                     endDrag();
                     field->regenMesh();
                     field->findPath();
                     setAction(WALKNESS);
                     emit statusUpdated(QString("Изменение препятствия: завершено"));
+                } else {
+                    if (field->removeFromObstacle(pos)) {
+                        emit objectsUpdated(field->polyCount());
+                        emit statusUpdated(QString("Изменение препятствия: точка удалена"));
+                    } else emit statusUpdated(QString("Изменение препятствия: точка не найдена"));
                 }
             }
             update();
