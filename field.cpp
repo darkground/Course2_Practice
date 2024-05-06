@@ -695,7 +695,7 @@ QVector<MeshPoint> Field::smoothv2Path(const QVector<MeshPoint>& vec, int maxSte
 //! Разделение пути
 //! Разделить линии путя на точки с заданным интервалом
 //!
-//! \param vec Путь, который необходимо сгладить.
+//! \param vec Путь
 //! \param interval Интервал разбиения точек на линии (в пикселях).
 //!
 QVector<MeshPoint> Field::splicePath(const QVector<MeshPoint>& vec, int interval) {
