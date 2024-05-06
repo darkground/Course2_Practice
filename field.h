@@ -19,7 +19,7 @@ public:
     static constexpr QColor easyObstacle = QColor(212, 212, 212);
     static constexpr QColor hardObstacle = QColor(74, 74, 74);
 
-    static constexpr QColor path = QColor(0, 255, 0);
+    static constexpr QColor path = QColor(4, 115, 0);
 
     static constexpr QColor outlineGrid = QColor(0, 0, 0, 50);
 
@@ -37,10 +37,9 @@ public:
 
     static constexpr float polyWidth = 2.f;
     static constexpr float pointWidth = 0.8f;
+    static constexpr float pathWidth = 2.1f;
 
-    static constexpr float pointGrabRadius = 6.;
-
-    bool drawFlag = false;
+    static constexpr double pointGrabRadius = 6.;
 
     bool dGrid = false;
     bool dGridOutline = false;
@@ -64,6 +63,8 @@ public:
 
     void setStart(QPoint point);
     void setEnd(QPoint point);
+    void unsetStart();
+    void unsetEnd();
     Waypoint getStart();
     Waypoint getEnd();
 
@@ -76,14 +77,17 @@ public:
     bool addToObstacle(const QPoint& point);
     bool addToObstacle(Obstacle& obst, const QPoint& point);
 
-    float findPath();
-    void aStarN(PriorityQueue<MeshPoint*, float>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, float>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
-    float aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way);
+    double findPath();
+    void aStarN(PriorityQueue<MeshPoint*, double>& queue, QHash<QPoint, QPoint>& origins, QHash<QPoint, double>& costs, MeshPoint* current, MeshPoint* finish, QPoint offset);
+    double aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way);
     QVector<MeshPoint> smoothv1Path(const QVector<MeshPoint>& vec);
     QVector<MeshPoint> smoothv2Path(const QVector<MeshPoint>& vec, int maxSteps = 16);
     QVector<MeshPoint> splicePath(const QVector<MeshPoint>& vec, int interval = 2);
+    double lengthPath(const QVector<MeshPoint>& vec);
+    bool consistentIntersectPath(const QLine& line, const Obstacle& obst);
 
     QSize size();
+    double pathLength();
     unsigned polyCount();
 
 protected:

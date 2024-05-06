@@ -42,7 +42,9 @@ void Field::draw(QPainter* painter) {
     }
 
     if (!dNoPath) {
-        QPen p(path);
+        QPen p(path, pathWidth);
+        p.setStyle(Qt::DotLine);
+
         painter->setPen(p);
         for (int i = 1; i < way.length(); i++) {
             MeshPoint& prev = way[i-1];
@@ -294,10 +296,10 @@ void Field::regenMesh() {
 //!
 MeshPoint* Field::nearestMesh(const QPoint& point) {
     MeshPoint* shortestMesh = 0;
-    float shortestDist = width * height;
+    double shortestDist = width * height;
     for (auto it = mesh.keyValueBegin(); it != mesh.keyValueEnd(); ++it) {
         MeshPoint& meshp = it->second;
-        float dist = euclideanDistance(meshp.realCoord, point);
+        double dist = euclideanDistance(meshp.realCoord, point);
         if (dist < shortestDist) {
             shortestDist = dist;
             shortestMesh = &meshp;
@@ -338,6 +340,22 @@ void Field::setStart(QPoint point) {
 void Field::setEnd(QPoint point) {
     qInfo() << "Field::end" << point;
     end.emplace(point);
+}
+
+//!
+//! Убрать старт
+//!
+void Field::unsetStart() {
+    qInfo() << "Field::start NULL";
+    start.reset();
+}
+
+//!
+//! Убрать финиш
+//!
+void Field::unsetEnd() {
+    qInfo() << "Field::end NULL";
+    end.reset();
 }
 
 //!
@@ -403,10 +421,7 @@ bool Field::removeObstacle(const QPoint& point) {
 //!
 bool Field::removeObstacle(const Obstacle& obst) {
     qInfo() << "Field::remObst" << obst.walkness;
-    if (obstacles.removeOne(obst)) {
-        regenMesh();
-        return true;
-    }
+    if (obstacles.removeOne(obst)) return true;
     return false;
 }
 
@@ -434,13 +449,13 @@ bool Field::addToObstacle(const QPoint& point) {
 bool Field::addToObstacle(Obstacle& obst, const QPoint& point) {
     QVector<QPoint> points = obst.poly.toVector();
     points.append(obst.poly.first());
-    float idx = 0;
-    float closest = width * height;
+    int idx = 0;
+    double closest = width * height;
 
     for (int i = 1; i < points.size(); i++) {
         QLine line(points[i-1], points[i]);
         QPoint nearest = nearestPointOnLine(line, point);
-        float dst = euclideanDistance(nearest, point);
+        double dst = euclideanDistance(nearest, point);
         if (dst < closest) {
             idx = i;
             closest = dst;
@@ -474,11 +489,11 @@ bool Field::removeFromObstacle(const QPoint& point) {
 //!
 bool Field::removeFromObstacle(Obstacle& obst, const QPoint& point) {
     int idx = -1;
-    float closest = width * height;
+    double closest = width * height;
 
     for (int i = 0; i < obst.poly.size(); i++) {
         QPoint& pt = obst.poly[i];
-        float dst = euclideanDistance(pt, point);
+        double dst = euclideanDistance(pt, point);
         if (dst < closest && dst <= Field::pointGrabRadius) {
             idx = i;
             closest = dst;
@@ -491,7 +506,7 @@ bool Field::removeFromObstacle(Obstacle& obst, const QPoint& point) {
     return true;
 }
 
-// Pathfinding
+// Pathfinding -- Пути
 
 //!
 //! Найти путь
@@ -502,21 +517,26 @@ bool Field::removeFromObstacle(Obstacle& obst, const QPoint& point) {
 //! \return ==0 если не получилось проложить путь от старта до финиша
 //! \return -1 если старт/финиш не задан
 //!
-float Field::findPath() {
+double Field::findPath() {
+    way.clear();
     if (!start.has_value() || !end.has_value()) return -1;
     MeshPoint* mstart = nearestMesh(*start);
     MeshPoint* mend = nearestMesh(*end);
     if (mstart == 0 || mend == 0) return -1;
+    if (mstart->walkness == 1. || mend->walkness == 1.) return 0;
 
-    way.clear();
-    float shortest = aStarPath(mstart, mend, way);
-    qInfo() << "Field::find" << shortest << "/" << way.length();
+    double shortest = aStarPath(mstart, mend, way);
 
-    way = smoothv1Path(way);
-    std::reverse(way.begin(), way.end());
-    way = splicePath(way);
-    way = smoothv1Path(way);
-    return shortest;
+    if (shortest > 0) {
+        way = smoothv1Path(way);
+        std::reverse(way.begin(), way.end());
+        way = splicePath(way);
+        way = smoothv1Path(way);
+    }
+
+    double len = lengthPath(way);
+    qInfo() << "Field::find" << len << shortest;
+    return len;
 }
 
 //!
@@ -532,9 +552,9 @@ float Field::findPath() {
 //! \param offset Смещение по координатам
 //!
 void Field::aStarN(
-    PriorityQueue<MeshPoint*, float>& queue,
+    PriorityQueue<MeshPoint*, double>& queue,
     QHash<QPoint, QPoint>& origins,
-    QHash<QPoint, float>& costs,
+    QHash<QPoint, double>& costs,
     MeshPoint* current,
     MeshPoint* finish,
     QPoint offset
@@ -543,7 +563,7 @@ void Field::aStarN(
     if (!mesh.contains(off)) return;
     MeshPoint* neighbor = &mesh[off];
     if (neighbor->walkness >= 1.) return;
-    float new_cost = costs[current->meshCoord] + vectorLength(offset) + neighbor->walkness;
+    double new_cost = costs[current->meshCoord] + vectorLength(offset) + neighbor->walkness;
     if (!costs.contains(neighbor->meshCoord) || new_cost < costs[neighbor->meshCoord]) {
         costs[neighbor->meshCoord] = new_cost;
         origins[neighbor->meshCoord] = current->meshCoord;
@@ -560,13 +580,13 @@ void Field::aStarN(
 //! \return Длина пути, если путь найден
 //! \return 0, если путь не найден
 //!
-float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way) {
+double Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& way) {
     way.clear();
-    PriorityQueue<MeshPoint*, float> queue;
+    PriorityQueue<MeshPoint*, double> queue;
     queue.put(start, 1.);
 
     QHash<QPoint, QPoint> origins;
-    QHash<QPoint, float> costs;
+    QHash<QPoint, double> costs;
     origins[start->meshCoord] = start->meshCoord;
     costs[start->meshCoord] = 1.;
     
@@ -587,7 +607,7 @@ float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& 
 
     QPoint current = finish->meshCoord;
     if (!origins.contains(current)) return 0;
-    float cost = costs[finish->meshCoord];
+    double cost = costs[finish->meshCoord];
     while (current != start->meshCoord) {
         MeshPoint meshp = mesh[current];
         way.append(meshp);
@@ -602,7 +622,7 @@ float Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>& 
 //! Сглаживание пути
 //! Сглаживание пути быстрым методом линейного прохода
 //!
-//! \param Путь, который необходимо сгладить.
+//! \param vec Путь, который необходимо сгладить.
 //!
 QVector<MeshPoint> Field::smoothv1Path(const QVector<MeshPoint>& vec) {
     if (vec.length() < 1) return vec;
@@ -613,7 +633,7 @@ QVector<MeshPoint> Field::smoothv1Path(const QVector<MeshPoint>& vec) {
     for (int i = 1; i < vec.length(); ++i) {
         QLine line(vec[curr].realCoord, vec[i].realCoord);
         for (int j = 0; j < obstacles.length(); ++j) {
-            if (lineIntersectsPolygon(line, obstacles[j].poly)) {
+            if (consistentIntersectPath(line, obstacles[j])) {
                 line.setP2(vec[i-1].realCoord);
                 finalVec.append(vec[i-1]);
                 curr = i-1;
@@ -629,7 +649,7 @@ QVector<MeshPoint> Field::smoothv1Path(const QVector<MeshPoint>& vec) {
 //! Сглаживание пути
 //! Сглаживание пути итеративным подходом упрощения
 //!
-//! \param Путь, который необходимо сгладить.
+//! \param vec Путь, который необходимо сгладить.
 //!
 QVector<MeshPoint> Field::smoothv2Path(const QVector<MeshPoint>& vec, int maxSteps) {
     if (vec.length() < 2) return vec;
@@ -675,7 +695,8 @@ QVector<MeshPoint> Field::smoothv2Path(const QVector<MeshPoint>& vec, int maxSte
 //! Разделение пути
 //! Разделить линии путя на точки с заданным интервалом
 //!
-//! \param Путь, который необходимо сгладить.
+//! \param vec Путь, который необходимо сгладить.
+//! \param interval Интервал разбиения точек на линии (в пикселях).
 //!
 QVector<MeshPoint> Field::splicePath(const QVector<MeshPoint>& vec, int interval) {
     QVector<MeshPoint> result;
@@ -693,6 +714,34 @@ QVector<MeshPoint> Field::splicePath(const QVector<MeshPoint>& vec, int interval
         result.append(vec[i]);
     }
     return result;
+}
+
+//!
+//! Длина пути
+//!
+//! \param vec Путь
+//!
+double Field::lengthPath(const QVector<MeshPoint>& vec) {
+    double l = 0;
+    for (int i = 1; i < vec.length(); i++) {
+        l += euclideanDistance(vec[i-1].realCoord, vec[i].realCoord);
+    }
+    return l;
+}
+
+//!
+//! Проверка на пересечение линии и полигона с учётом фактора непроходимости
+//!
+//! \param line Линия
+//! \param obst Препятствие
+//! \return Успех или нет
+//!
+bool Field::consistentIntersectPath(const QLine& line, const Obstacle& obst) {
+    double w1 = getFactorMap(line.p1());
+    double w2 = getFactorMap(line.p2());
+    if (w1 != obst.walkness && w2 != obst.walkness) return lineIntersectsPolygon(line, obst.poly);
+    else if (w1 == obst.walkness && w2 == obst.walkness) return false;
+    else return lineIntersectsPolygon(line, obst.poly);
 }
 
 //!
