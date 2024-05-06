@@ -708,10 +708,8 @@ QVector<MeshPoint> Field::splicePath(const QVector<MeshPoint>& vec, int interval
         for (int j = 0; j < dist; j += interval) {
             QPoint init = formed.p1();
             QPoint rp = QPoint(init.x() + dx * j, init.y() + dy * j);
-            if (getFactorMap(rp) == 0.) {
-                MeshPoint mp = MeshPoint(QPoint(-1, -1), rp, 0);
-                result.append(mp);
-            }
+            MeshPoint mp = MeshPoint(QPoint(-1, -1), rp, 0);
+            result.append(mp);
         }
         result.append(vec[i]);
     }
