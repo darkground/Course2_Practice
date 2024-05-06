@@ -84,10 +84,10 @@ public:
     QVector<MeshPoint> smoothv2Path(const QVector<MeshPoint>& vec, int maxSteps = 16);
     QVector<MeshPoint> splicePath(const QVector<MeshPoint>& vec, int interval = 2);
     double lengthPath(const QVector<MeshPoint>& vec);
+    double lengthPath();
     bool consistentIntersectPath(const QLine& line, const Obstacle& obst);
 
     QSize size();
-    double pathLength();
     unsigned polyCount();
 
 protected:

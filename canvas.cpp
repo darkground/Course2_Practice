@@ -315,6 +315,7 @@ void Canvas::loadMap(const QString& path) {
         break;
     default:
         setMinimumSize(field->size());
+        wayLength = field->lengthPath();
         emit sizeChanged(field->size());
         emit statusUpdated(QString("Загрузка карты: XML-файл успешно загружен"));
         emit objectsUpdated(field->polyCount());

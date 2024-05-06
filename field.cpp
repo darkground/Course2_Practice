@@ -730,6 +730,13 @@ double Field::lengthPath(const QVector<MeshPoint>& vec) {
 }
 
 //!
+//! Получить длину текущего пути
+//!
+double Field::lengthPath() {
+    return lengthPath(way);
+}
+
+//!
 //! Проверка на пересечение линии и полигона с учётом фактора непроходимости
 //!
 //! \param line Линия
