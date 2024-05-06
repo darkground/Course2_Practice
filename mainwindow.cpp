@@ -120,6 +120,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
     ui->widgetGraph->update();
 }
 
+//!
+//! Функция для обработки изменения координат поля.
+//!
+//! \param p Точка
+//!
 void MainWindow::coordMoved(QPoint p) {
     if (p == QPoint(-1, -1)) {
         QString s = QString("X, Y: [-, -]");
@@ -130,20 +135,38 @@ void MainWindow::coordMoved(QPoint p) {
     }
 }
 
+//!
+//! Функция для обработки изменения количества объектов
+//!
+//! \param c Количество объектов
+//!
 void MainWindow::objectsUpdated(unsigned c) {
     QString s = QString("%1 объектов").arg(c);
     ui->labelObjects->setText(s);
 }
 
+//!
+//! Функция для обработки изменения статуса
+//!
+//! \param s Текст статуса
+//!
 void MainWindow::statusUpdated(QString s) {
     ui->labelStatus->setText(s);
 }
 
+//!
+//! Функция для обработки изменения размеров карты
+//!
+//! \param sz Размеры
+//!
 void MainWindow::sizeChanged(QSize sz) {
     QString s = QString("%1 x %2").arg(sz.width()).arg(sz.height());
     ui->labelSize->setText(s);
 }
 
+//!
+//! Функция загрузки карты. Вызывается кнопкой на форме
+//!
 void MainWindow::mapLoad() {
     QString fi = QFileDialog::getOpenFileName(this, "Загрузить карту", QString(), "XML files (*.xml)");
     if (!fi.isEmpty() && !fi.isNull()) {
@@ -152,6 +175,9 @@ void MainWindow::mapLoad() {
     }
 }
 
+//!
+//! Функция сохранения карты. Вызывается кнопкой на форме
+//!
 void MainWindow::mapSave() {
     QString fi = QFileDialog::getSaveFileName(this, "Сохранить карту", QString(), "XML files (*.xml)");
     if (!fi.isEmpty() && !fi.isNull()) {
@@ -159,30 +185,58 @@ void MainWindow::mapSave() {
     }
 }
 
+//!
+//! Функция смены действия на проверку проходимости.
+//! Вызывается когда любое другое действие отменено или клавишей [1]
+//!
 void MainWindow::actionWalk() {
     ui->widgetGraph->setAction(CanvasAction::WALKNESS);
 }
 
-void MainWindow::actionStart() {
-    ui->widgetGraph->setAction(CanvasAction::START);
-}
-
-void MainWindow::actionEnd() {
-    ui->widgetGraph->setAction(CanvasAction::END);
-}
-
+//!
+//! Функция смены действия на создание препятствия.
+//! Вызывается кнопкой на форме или клавишей [2]
+//!
 void MainWindow::actionCreate() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_CREATE);
 }
 
+//!
+//! Функция смены действия на удаление препятствия.
+//! Вызывается кнопкой на форме или клавишей [3]
+//!
 void MainWindow::actionDelete() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_DELETE);
 }
 
+//!
+//! Функция смены действия на изменения препятствия.
+//! Вызывается кнопкой на форме или клавишей [4]
+//!
 void MainWindow::actionEdit() {
     ui->widgetGraph->setAction(CanvasAction::POLYGON_EDIT);
 }
 
+//!
+//! Функция смены действия на установку старта.
+//! Вызывается кнопкой на форме или клавишей [5]
+//!
+void MainWindow::actionStart() {
+    ui->widgetGraph->setAction(CanvasAction::START);
+}
+
+//!
+//! Функция смены действия на установку финиша.
+//! Вызывается кнопкой на форме или клавишей [6]
+//!
+void MainWindow::actionEnd() {
+    ui->widgetGraph->setAction(CanvasAction::END);
+}
+
+//!
+//! Функция изменения размеров карты.
+//! Вызывается кнопкой на форме справа снизу
+//!
 void MainWindow::resizeField() {
     bool ok;
     int w = QInputDialog::getInt(this, "Изменение размера карты", "Введите ширину:", 800, 100, 2000, 1, &ok, Qt::WindowFlags());

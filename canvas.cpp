@@ -296,6 +296,11 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
+//!
+//! Загрузить карту в поле из XML-файла
+//!
+//! \param path Путь до файла
+//!
 void Canvas::loadMap(const QString& path) {
     int code = field->loadMap(path);
     switch (code) {
@@ -318,6 +323,11 @@ void Canvas::loadMap(const QString& path) {
     }
 }
 
+//!
+//! Сохранить карту поля в XML-файл
+//!
+//! \param path Путь до файла
+//!
 void Canvas::saveMap(const QString& path) {
     int code = field->saveMap(path);
     switch (code) {
@@ -330,6 +340,11 @@ void Canvas::saveMap(const QString& path) {
     }
 }
 
+//!
+//! Изменить размеры карты поля
+//!
+//! \param size Размеры карты
+//!
 void Canvas::resizeMap(QSize size) {
     field = new Field(size.width(), size.height());
     setMinimumSize(size);
@@ -339,6 +354,12 @@ void Canvas::resizeMap(QSize size) {
 
 // Polygon Editing -- Редактирование полигонов
 
+//!
+//! Захватить точку препятствия.
+//! Используется при редактировании препятствия
+//!
+//! \param point Точка
+//!
 void Canvas::startDrag(QPoint point) {
     endDrag();
     double closest = Field::pointGrabRadius;
@@ -354,6 +375,13 @@ void Canvas::startDrag(QPoint point) {
     }
 }
 
+//!
+//! Перемещать захваченную точку.
+//! Если точка не захвачена, то вернёт false.
+//!
+//! \param point Место, куда нужно переместить точку
+//! \return Успех или нет
+//!
 bool Canvas::moveDrag(QPoint point) {
     if (attach == 0 || !field->inMap(point)) return false;
     QPolygon it = *attach;
@@ -371,6 +399,9 @@ bool Canvas::moveDrag(QPoint point) {
     return true;
 }
 
+//!
+//! Снять захват точки
+//!
 void Canvas::endDrag() {
     attach = 0;
     drag = 0;
@@ -378,10 +409,20 @@ void Canvas::endDrag() {
 
 // Polygon Drawing -- Функции рисования полигонов
 
+//!
+//! Начать рисование препятствия.
+//!
 void Canvas::startDraw() {
     draw = new QPolygon();
 }
 
+//!
+//! Добавить точку в препятствие
+//! Ничего не делает если рисование не начато
+//!
+//! \param point Точка
+//! \return Успех или нет
+//!
 bool Canvas::doDraw(QPoint point) {
     if (draw == 0) return false;
     if (field->getFactorMap(point) != 0.) return false;
@@ -394,6 +435,10 @@ bool Canvas::doDraw(QPoint point) {
     return true;
 }
 
+//!
+//! Убрать последнюю точку в рисующем препятствии
+//! Ничего не делает если рисование не начато
+//!
 void Canvas::undoDraw() {
     if (draw == 0) return;
     if (!draw->empty()) {
@@ -401,6 +446,12 @@ void Canvas::undoDraw() {
     }
 }
 
+//!
+//! Подтвердить рисование полигона и добавить его ко всем препятствиям.
+//! Ничего не делает если рисование не начато
+//!
+//! \param w Непроходимость
+//!
 void Canvas::confirmDraw(double w) {
     if (draw == 0) return;
     if (draw->length() > 2) {
@@ -409,7 +460,13 @@ void Canvas::confirmDraw(double w) {
     }
 }
 
+//!
+//! Закончить рисование полигона
+//! Ничего не делает если рисование не начато
+//!
 void Canvas::endDraw() {
-    delete draw;
-    draw = 0;
+    if (draw != 0) {
+        delete draw;
+        draw = 0;
+    }
 }
