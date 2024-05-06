@@ -45,6 +45,8 @@ signals:
 protected:
     Field* field = 0;
     CanvasAction action = WALKNESS;
+    double wayLength = -1;
+    bool changes = false;
 
     QPolygon* draw = 0;
     QPolygon* attach = 0;
@@ -64,7 +66,7 @@ protected:
     void startDraw();
     bool doDraw(QPoint point);
     void undoDraw();
-    void confirmDraw(float w);
+    void confirmDraw(double w);
     void endDraw();
 
 private:
