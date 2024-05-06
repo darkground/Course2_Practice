@@ -4,6 +4,7 @@ msvc_make.bat
 .vscode
 debug/
 release/
+data.xml
 
 # C++ objects and libs
 *.slo
