@@ -184,7 +184,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event) {
     switch (action) {
         case WALKNESS: {
             if (event->button() == Qt::LeftButton) {
-                int w = field->getFactorMap(pos) * 100;
+                double w = field->getFactorMap(pos) * 100;
                 emit statusUpdated(QString("Непроходимость в [%1, %2] = %3").arg(pos.x()).arg(pos.y()).arg(w) + QString("%"));
             }
             break;

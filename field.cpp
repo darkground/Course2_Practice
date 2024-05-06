@@ -35,7 +35,7 @@ void Field::draw(QPainter* painter) {
             QPoint center = polygonCentroid(obst.poly);
             if (obst.poly.boundingRect().contains(center)) {
                 QRect rect(center - QPoint(30, 30), QSize(60, 60));
-                int w = obst.walkness * 100;
+                double w = obst.walkness * 100;
                 painter->drawText(rect, Qt::AlignCenter, QString::number(w) + QString("%"));
             }
         }
