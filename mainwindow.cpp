@@ -1,3 +1,4 @@
+#include <QFileDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -144,12 +145,18 @@ void MainWindow::sizeChanged(QSize sz) {
 }
 
 void MainWindow::mapLoad() {
-    ui->widgetGraph->loadMap("data.xml");
-    ui->widgetGraph->update();
+    QString fi = QFileDialog::getOpenFileName(this, "Загрузить карту", QString(), "XML files (*.xml)");
+    if (!fi.isEmpty() && !fi.isNull()) {
+        ui->widgetGraph->loadMap(fi);
+        ui->widgetGraph->update();
+    }
 }
 
 void MainWindow::mapSave() {
-    ui->widgetGraph->saveMap("data.xml");
+    QString fi = QFileDialog::getSaveFileName(this, "Сохранить карту", QString(), "XML files (*.xml)");
+    if (!fi.isEmpty() && !fi.isNull()) {
+        ui->widgetGraph->saveMap(fi);
+    }
 }
 
 void MainWindow::actionWalk() {
