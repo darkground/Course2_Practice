@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>944</width>
-    <height>544</height>
+    <height>548</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,7 +82,7 @@ padding: 3px;</string>
        <item>
         <widget class="QPushButton" name="btnEdit">
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Начать редактирование препятствия.&lt;/span&gt; При редактировании мышью можно редактировать препятствия на карте&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ЛКМ &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(зажать)&lt;/span&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;:&lt;/span&gt; Нажмите на точку и перетаскивайте для её перемещения по карте&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ПКМ:&lt;/span&gt; Удалить точку, находящуюся под курсором мыши&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ЛКМ:&lt;/span&gt; Добавить точку в препятствие под курсором мыши. Точка  будет добавлена к ближайшему лежащему ребру. Курсор мыши должен быть внутри препятствия&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ПКМ:&lt;/span&gt; Выйти из режима редактирования препятствия&lt;/p&gt;&lt;p&gt;Горячая клавиша:&lt;span style=&quot; font-weight:700;&quot;&gt; [ 4 ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Начать редактирование препятствия.&lt;/span&gt; При редактировании мышью можно редактировать препятствия на карте&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ЛКМ &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(зажать)&lt;/span&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;:&lt;/span&gt; Нажмите на точку и перетаскивайте для её перемещения по карте&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;ПКМ:&lt;/span&gt; Выйти из режима редактирования препятствия&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ЛКМ:&lt;/span&gt; Добавить точку в препятствие под курсором мыши. Точка будет добавлена к ближайшему лежащему ребру. Курсор мыши должен быть внутри препятствия&lt;br/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Shift+ПКМ:&lt;/span&gt; Удалить точку, находящуюся под курсором мыши&lt;/p&gt;&lt;p&gt;Горячая клавиша:&lt;span style=&quot; font-weight:700;&quot;&gt; [ 4 ]&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="styleSheet">
           <string notr="true">text-align: left;
@@ -252,6 +252,9 @@ padding: 3px;</string>
           </property>
           <item>
            <widget class="QLabel" name="labelStatus">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Строка статуса.&lt;/span&gt; Здесь будут появляться результаты действий, таких как добавление, удаление и т.д.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>Нет работы</string>
             </property>
@@ -272,6 +275,9 @@ padding: 3px;</string>
           </item>
           <item>
            <widget class="QPushButton" name="labelSize">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Изменить размеры карты.&lt;/span&gt; Задать размеры карты.&lt;/p&gt;&lt;p&gt;Примечание: все объекты, а также путь, будут удалены&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>800 x 500</string>
             </property>
@@ -286,6 +292,9 @@ padding: 3px;</string>
           </item>
           <item>
            <widget class="QLabel" name="labelObjects">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Счётчик объектов.&lt;/span&gt; Показывает сколько существует препятствий на карте&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>0 объектов</string>
             </property>
@@ -300,6 +309,9 @@ padding: 3px;</string>
           </item>
           <item>
            <widget class="QLabel" name="labelCoords">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Координаты мыши на карте.&lt;/span&gt; Показывает координаты курсора мыши на карте.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>X, Y: [-, -]</string>
             </property>
