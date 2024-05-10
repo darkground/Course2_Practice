@@ -15,11 +15,12 @@ typedef std::optional<QPoint> Waypoint;
 
 class Field {
 public:
-    static constexpr QColor outlineObstacle = QColor(26, 26, 26);
-    static constexpr QColor easyObstacle = QColor(212, 212, 212);
-    static constexpr QColor hardObstacle = QColor(74, 74, 74);
+    static constexpr QColor outlineObstacle = QColor(110, 0, 27);
+    static constexpr QColor easyObstacle = QColor(224, 224, 224);
+    static constexpr QColor hardObstacle = QColor(105, 105, 105);
+    static constexpr QColor textObstacle = QColor(1, 1, 1);
 
-    static constexpr QColor path = QColor(4, 115, 0);
+    static constexpr QColor path = QColor(24, 117, 219);
 
     static constexpr QColor outlineGrid = QColor(0, 0, 0, 50);
 
@@ -35,9 +36,9 @@ public:
     static constexpr int minHeight = 100;
     static constexpr int maxHeight = 2000;
 
-    static constexpr float polyWidth = 2.f;
+    static constexpr float polyWidth = 1.8f;
     static constexpr float pointWidth = 0.8f;
-    static constexpr float pathWidth = 2.1f;
+    static constexpr float pathWidth = 2.4f;
 
     static constexpr double pointGrabRadius = 6.;
 

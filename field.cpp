@@ -25,13 +25,16 @@ void Field::draw(QPainter* painter) {
     }
 
     if (!dNoObstacles) {
-        QPen p(outlineObstacle, polyWidth);
-        painter->setPen(p);
+        QPen p1(outlineObstacle, polyWidth);
+        QPen p2(textObstacle, polyWidth);
         painter->setFont(QFont("Times", 16));
         for (Obstacle& obst : obstacles) {
+            painter->setPen(p1);
             QColor polyColor = mix(easyObstacle, hardObstacle, obst.walkness);
             painter->setBrush(polyColor);
             painter->drawPolygon(obst.poly);
+
+            painter->setPen(p2);
             QPoint center = polygonCentroid(obst.poly);
             if (obst.poly.boundingRect().contains(center)) {
                 QRect rect(center - QPoint(30, 30), QSize(60, 60));
@@ -42,13 +45,12 @@ void Field::draw(QPainter* painter) {
     }
 
     if (!dNoPath) {
-        QPen p(path, pathWidth);
-        p.setStyle(Qt::DotLine);
+        QPen p(path, pathWidth, Qt::DotLine);
 
-        painter->setPen(p);
         for (int i = 1; i < way.length(); i++) {
             MeshPoint& prev = way[i-1];
             MeshPoint& next = way[i];
+            painter->setPen(p);
             painter->drawLine(prev.realCoord, next.realCoord);
         }
     }
