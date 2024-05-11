@@ -596,15 +596,17 @@ double Field::aStarPath(MeshPoint* start, MeshPoint* finish, QVector<MeshPoint>&
         MeshPoint* current = queue.get();
         if (current == finish) break;
         
-        aStarN(queue, origins, costs, current, finish, QPoint(1, 0));
-        aStarN(queue, origins, costs, current, finish, QPoint(0, 1));
-        aStarN(queue, origins, costs, current, finish, QPoint(-1, 0));
-        aStarN(queue, origins, costs, current, finish, QPoint(0, -1));
-        // Diagonals
-        aStarN(queue, origins, costs, current, finish, QPoint(1, 1));
-        aStarN(queue, origins, costs, current, finish, QPoint(1, -1));
-        aStarN(queue, origins, costs, current, finish, QPoint(-1, 1));
-        aStarN(queue, origins, costs, current, finish, QPoint(-1, -1));
+        if ((current->meshCoord.x() + current->meshCoord.y()) == 0) {
+            aStarN(queue, origins, costs, current, finish, QPoint(0, 1));
+            aStarN(queue, origins, costs, current, finish, QPoint(0, -1));
+            aStarN(queue, origins, costs, current, finish, QPoint(-1, 0));
+            aStarN(queue, origins, costs, current, finish, QPoint(1, 0));
+        } else {
+            aStarN(queue, origins, costs, current, finish, QPoint(1, 0));
+            aStarN(queue, origins, costs, current, finish, QPoint(-1, 0));
+            aStarN(queue, origins, costs, current, finish, QPoint(0, -1));
+            aStarN(queue, origins, costs, current, finish, QPoint(0, 1));
+        }
     }
 
     QPoint current = finish->meshCoord;
