@@ -641,13 +641,13 @@ QVector<MeshPoint> Field::smoothv1Path(const QVector<MeshPoint>& vec) {
     if (vec.length() < 1) return vec;
     QVector <MeshPoint> finalVec;
     int curr = 0;
+    int vec_size = vec.length();
 
     finalVec.append(vec[curr]);
-    for (int i = 1; i < vec.length(); ++i) {
+    for (int i = 1; i < vec_size; ++i) {
         QLine line(vec[curr].realCoord, vec[i].realCoord);
         for (int j = 0; j < obstacles.length(); ++j) {
             if (consistentIntersectPath(line, obstacles[j])) {
-                line.setP2(vec[i-1].realCoord);
                 finalVec.append(vec[i-1]);
                 curr = i-1;
                 break;
@@ -761,6 +761,7 @@ bool Field::consistentIntersectPath(const QLine& line, const Obstacle& obst) {
     double w2 = getFactorMap(line.p2());
     if (w1 != obst.walkness && w2 != obst.walkness) return lineIntersectsPolygon(line, obst.poly);
     else if (w1 == obst.walkness && w2 == obst.walkness) return false;
+    // else return true;
     else return lineIntersectsPolygon(line, obst.poly);
 }
 
