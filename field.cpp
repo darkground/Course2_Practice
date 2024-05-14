@@ -1,3 +1,8 @@
+//!
+//! Класс поля, содержащий все необходимые объекты для отрисовки
+//! и вычисления пути от одной точки до другой
+//!
+
 #include "field.h"
 #include "utils.h"
 
@@ -12,6 +17,10 @@ Field::~Field() {
     if (drawPoly != 0) delete drawPoly;
 }
 
+//!
+//! Отрисовать поле на данном QPainter
+//! \param painter QPainter
+//!
 void Field::draw(QPainter* painter) {
     if (dGrid) {
         QPen p(dGridOutline ? outlineGrid : QColor(0, 0, 0, 0));

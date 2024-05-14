@@ -1,3 +1,8 @@
+//!
+//! Класс холста.
+//! В основном используется для обработки и управления внутренним 'Полем'.
+//!
+
 #include "canvas.h"
 #include "utils.h"
 
@@ -10,6 +15,10 @@ Canvas::~Canvas() {
     delete field;
 }
 
+//!
+//! Установить текущее действие (инструмент) холста.
+//! \param a Действие
+//!
 void Canvas::setAction(CanvasAction a) {
     switch (action) {
         case POLYGON_CREATE:
@@ -42,10 +51,18 @@ void Canvas::setAction(CanvasAction a) {
     action = a;
 }
 
+//!
+//! Получить внутреннее поле
+//! \return Поле
+//!
 Field* Canvas::getField() {
     return field;
 }
 
+//!
+//! Событие показа холста.
+//! Используется для отложенной инициализации внутреннего поля.
+//!
 void Canvas::showEvent(QShowEvent*) {
     if (field == 0) {
         QSize canvasSize = minimumSize();
@@ -53,6 +70,9 @@ void Canvas::showEvent(QShowEvent*) {
     }
 }
 
+//!
+//! Событие отрисовки холста.
+//!
 void Canvas::paintEvent(QPaintEvent*) {
     QPainter painter;
 
@@ -131,6 +151,12 @@ void Canvas::paintEvent(QPaintEvent*) {
     painter.end();
 }
 
+//!
+//! Обработчик событий холста.
+//! Используется для получения событий мыши.
+//! \param e Событие
+//! \return Результат события
+//!
 bool Canvas::event(QEvent* e) {
     switch(e->type()) {
         case QEvent::HoverLeave: {
@@ -148,6 +174,10 @@ bool Canvas::event(QEvent* e) {
     return QWidget::event(e);
 }
 
+//!
+//! Событие нажатия кнопки мыши.
+//! \param event Событие
+//!
 void Canvas::mousePressEvent(QMouseEvent* event) {
     QPoint pos = event->pos();
     switch (action) {
@@ -163,6 +193,10 @@ void Canvas::mousePressEvent(QMouseEvent* event) {
     }
 }
 
+//!
+//! Событие перемещения мыши.
+//! \param event Событие
+//!
 void Canvas::mouseMoveEvent(QMouseEvent* event) {
     QPoint pos = event->pos();
     switch (action) {
@@ -179,6 +213,10 @@ void Canvas::mouseMoveEvent(QMouseEvent* event) {
     }
 }
 
+//!
+//! Событие отпуска кнопки мыши.
+//! \param event Событие
+//!
 void Canvas::mouseReleaseEvent(QMouseEvent* event) {
     QPoint pos = event->pos();
     switch (action) {

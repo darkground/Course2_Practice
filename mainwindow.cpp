@@ -1,3 +1,7 @@
+//!
+//! Класс главного окна/интерфейса.
+//!
+
 #include <QFileDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
